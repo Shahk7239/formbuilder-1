@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { map, shareReplay } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -43,4 +43,30 @@ export class FetcherService {
     });
   }
 
+  //Saveing screen data
+  saveScreenData(screenData)
+  {
+    console.log(screenData);
+    return this.httpClient.post<any>("http://localhost:3000/api/postScreen",screenData)
+        .pipe(
+        retry(1),
+        catchError(this.handleError)
+    )
+  }
+
+
+
+  //Handle errors for API calls
+  handleError(error) {
+    let errorMessage = '';
+    if(error.error instanceof ErrorEvent) {
+      // Get client-side error
+      errorMessage = error.error.message;
+    } else {
+      // Get server-side error
+      errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
+    }
+    window.alert(errorMessage);
+    return throwError(errorMessage);
+ }
 }

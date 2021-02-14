@@ -11,6 +11,7 @@ import { DropAreaComponent } from './drop-area/drop-area.component';
 import {FetcherService} from './fetcher.service'
 import { HttpClientModule } from '@angular/common/http';
 import { ViewFormComponent } from './view-form/view-form.component';
+import { AddScreenComponent } from './add-screen/add-screen.component';
 
 const appRoutes: Routes = [
   { path: '', component: EditAppComponent },
@@ -22,7 +23,8 @@ const appRoutes: Routes = [
     EditAppComponent,
     DropAreaComponent,
     ViewFormComponent,
-    routingComponent
+    routingComponent,
+    AddScreenComponent
   ],
   imports: [
     RouterModule.forRoot(appRoutes),

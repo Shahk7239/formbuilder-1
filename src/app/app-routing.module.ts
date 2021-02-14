@@ -1,10 +1,14 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
+import { AddScreenComponent } from './add-screen/add-screen.component';
+import { EditAppComponent } from './edit-app/edit-app.component';
 import { ViewFormComponent } from './view-form/view-form.component';
 
 
 const routes: Routes = [
-  {path: 'viewform', component: ViewFormComponent}
+  {path: '', component: AddScreenComponent},
+  {path: 'viewform', component: ViewFormComponent},
+  {path: 'create-form', component: EditAppComponent}
 ];
 
 @NgModule({
