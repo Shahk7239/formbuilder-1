@@ -3,10 +3,6 @@ const route = new express.Router()
 var connection = require('../config/db')
 const query = require('../config/query');
 
-route.get('/', function (req, res, next) {
-    res.send({ message: 'Welcome to sbu APIs' })
-})
-
 // route.get('/getforms',function(req,res){
 //   operations.getFormDataP().then(data=>{
 //     let arr = [];
@@ -40,14 +36,14 @@ route.get('/', function (req, res, next) {
 
 
 //Mohan
-route.get("/api/getform", async (req,res) => {
+route.get("/getform", async (req,res) => {
   const conn = await connection().catch(e => {});
   const results = await query(conn,'SELECT formJSON FROM form').
   catch((err) => { res.status(400).json(err);})
   res.status(200).send(results);
 });
 
-route.post("/api/postform", async (req,res) =>{
+route.post("/postform", async (req,res) =>{
   //console.log(req.body)
   const { id,formJSON } = req.body;
   const conn = await connection().catch(e => {});
@@ -56,7 +52,7 @@ route.post("/api/postform", async (req,res) =>{
   res.status(200).json({ Message: 'Got it' });
 });
 
-route.post("/api/CreateDB", async (req,res) =>{
+route.post("/CreateDB", async (req,res) =>{
   //console.log(req.body)
   const { name } = req.body;
   const conn = await connection().catch(e => {});
@@ -65,7 +61,7 @@ route.post("/api/CreateDB", async (req,res) =>{
   res.status(200).json({ Message: 'Created Database' });
 });
 
-route.post("/api/CreateTable", async (req,res) =>{
+route.post("/CreateTable", async (req,res) =>{
   //console.log(req.body)
   const { name } = req.body;
   const conn = await connection().catch(e => {});
@@ -74,7 +70,7 @@ route.post("/api/CreateTable", async (req,res) =>{
   res.status(200).json({ Message: 'Created Table' });
 });
 
-route.post("/api/DropTable", async (req,res) =>{
+route.post("/DropTable", async (req,res) =>{
   //console.log(req.body)
   const { name } = req.body;
   const conn = await connection().catch(e => {});
@@ -83,7 +79,7 @@ route.post("/api/DropTable", async (req,res) =>{
   res.status(200).json({ Message: 'Dropped Table' });
 });
 
-route.post("/api/DropDatabase", async (req,res) =>{
+route.post("/DropDatabase", async (req,res) =>{
   //console.log(req.body)
   const { name } = req.body;
   const conn = await connection().catch(e => {});
