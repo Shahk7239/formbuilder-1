@@ -12,6 +12,7 @@ import {FetcherService} from './fetcher.service'
 import { HttpClientModule } from '@angular/common/http';
 import { ViewFormComponent } from './view-form/view-form.component';
 import { AddScreenComponent } from './add-screen/add-screen.component';
+import { NotfoundComponent } from './notfound/notfound.component';
 
 const appRoutes: Routes = [
   { path: '', component: EditAppComponent },
@@ -24,7 +25,8 @@ const appRoutes: Routes = [
     DropAreaComponent,
     ViewFormComponent,
     routingComponent,
-    AddScreenComponent
+    AddScreenComponent,
+    NotfoundComponent
   ],
   imports: [
     RouterModule.forRoot(appRoutes),
