@@ -350,7 +350,7 @@ export class DropAreaComponent implements OnInit {
   }
 
   putForm(){
-    let valstring = JSON.stringify(this.model.attributes)
+    let valstring = JSON.stringify(this.model.attributes);
     this.fetchService.putForms(valstring).subscribe(res=>{
       console.log(res)
     })

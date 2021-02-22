@@ -2,6 +2,7 @@ const express = require('express')
 const route = new express.Router()
 var connection = require('../config/db')
 const query = require('../config/query');
+var dbName = require("../config/dbName");
 
 // route.get('/getforms',function(req,res){
 //   operations.getFormDataP().then(data=>{
@@ -32,7 +33,14 @@ const query = require('../config/query');
 // });
 
 
-
+route.post("/postScreen", async (req, res) => {
+  //console.log(req.body)
+  const {version,orgName,orgID, screenName,screenNo,time,formID,JSON} = req.body;
+  const conn = await connection().catch(e => { });
+  const result = await query(conn, "INSERT INTO `screen_table` VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+  [version, orgName, orgID, screenName, screenNo, time, formID, JSON]).catch((err) => { res.status(400).send(err); })
+  res.status(200).json({ Message: 'Got it' });
+});
 
 
 //Mohan
@@ -47,7 +55,7 @@ route.post("/postform", async (req,res) =>{
   //console.log(req.body)
   const { id,formJSON } = req.body;
   const conn = await connection().catch(e => {});
-  const result = await query(conn, "INSERT INTO `form` (id, formJSON) VALUES (?, ?)",
+  const result = await query(conn, "INSERT INTO "+dbName+".`form` (id, formJSON) VALUES (?, ?)",
   [id, formJSON]).catch((err) => {res.status(400).send(err);})
   res.status(200).json({ Message: 'Got it' });
 });
@@ -55,8 +63,9 @@ route.post("/postform", async (req,res) =>{
 route.post("/CreateDB", async (req,res) =>{
   //console.log(req.body)
   const { name } = req.body;
+  dbName = name;
   const conn = await connection().catch(e => {});
-  const result = await query(conn, "Create Database ?",[name])
+  const result = await query(conn, "Create Database "+name)
   .catch((err) => {res.status(400).send(err);})
   res.status(200).json({ Message: 'Created Database' });
 });
@@ -65,16 +74,17 @@ route.post("/CreateTable", async (req,res) =>{
   //console.log(req.body)
   const { name } = req.body;
   const conn = await connection().catch(e => {});
-  const result = await query(conn, "Create Table ? (id VARCHAR(200), formJSON JSON)",[name])
+  const result = await query(conn, "Create Table "+dbName+"."+name+"(type VARCHAR(100), name VARCHAR(100) NOT NULL, value VARCHAR(250) NOT NULL, PRIMARY KEY (name));")
   .catch((err) => {res.status(400).send(err);})
   res.status(200).json({ Message: 'Created Table' });
 });
+
 
 route.post("/DropTable", async (req,res) =>{
   //console.log(req.body)
   const { name } = req.body;
   const conn = await connection().catch(e => {});
-  const result = await query(conn, "DROP Table ?",[name]).
+  const result = await query(conn, "DROP Table "+dbName+"."+name).
   catch((err) => {res.status(400).send(err);})
   res.status(200).json({ Message: 'Dropped Table' });
 });
@@ -83,7 +93,7 @@ route.post("/DropDatabase", async (req,res) =>{
   //console.log(req.body)
   const { name } = req.body;
   const conn = await connection().catch(e => {});
-  const result = await query(conn, "DROP Database ?",[name]).
+  const result = await query(conn, "DROP Database "+name).
   catch((err) => {res.status(400).send(err);})
   res.status(200).json({ Message: 'Dropped Table' });
 });

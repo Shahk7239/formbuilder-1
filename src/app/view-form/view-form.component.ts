@@ -210,33 +210,60 @@ export class ViewFormComponent implements OnInit {
   getAvailableForms(){
     
     this.fetchService.getForms().subscribe((res)=>{
-      // console.log(res)
-      // for(let i=0; i< res.length; i++){
-      //   this.model.attributes.push(res[i])
-      // }
-      // console.log(this.model);
-      const[obj] = res
-      var result = obj.slice(1,-1);
-      console.log(result);
-      //this.model.attributes.push(result)
-      let arrEls =result.split("{\"type\"").map(x=>"{\"type\""+x)
-      arrEls = arrEls.splice(1,arrEls.length-1)
-      var JSONString = [];
-      // for (let i=0; i<arrEls.length-1; i++)
-      //   arrEls[i] = arrEls.splice(0, arrEls.length);
-      for (let i=0; i<arrEls.length-1; i++)
-        arrEls[i] = arrEls[i].substring(0,arrEls[i].length-1)
-      for (let i=0; i<arrEls.length; i++){
-        JSONString[i]=JSON.parse(arrEls[i]); 
-        this.model.attributes.push(JSONString[i])
-      }
-      //console.log(arrEls)
-      //var JSONString=JSON.parse(arrEls[0]); 
-      console.log(JSONString)
       
-      //arrEls.map(x=> console.log(JSON.parse(x.slice(1,-2))))
+      this.model.attributes = JSON.parse(res[3].formJSON);
+      //console.log(this.model.attributes);
+      
     })
       
   } 
+
+  submit(){
+    let valid = true;
+    let validationArray = JSON.parse(JSON.stringify(this.model.attributes));
+    validationArray.reverse().forEach(field => {
+      //console.log(field.label+'=>'+field.required+"=>"+field.value);
+      if(field.required && !field.value && field.type != 'checkbox'){
+        swal('Error','Please enter '+field.label,'error');
+        valid = false;
+        return false;
+      }
+      if(field.required && field.regex){
+        let regex = new RegExp(field.regex);
+        if(regex.test(field.value) == false){
+          swal('Error',field.errorText,'error');
+          valid = false;
+          return false;
+        }
+      }
+      if(field.required && field.type == 'checkbox'){
+        if(field.values.filter(r=>r.selected).length == 0){
+          swal('Error','Please enterrr '+field.label,'error');
+          valid = false;
+          return false;
+        }
+
+      }
+    });
+    if(!valid){
+      return false;
+    }
+    console.log("Saved")
+    for(var i=0;i<this.model.attributes.length;i++)
+    {
+      console.log(this.model.attributes[i].label +  " - " + this.model.attributes[i].value);
+    }
+    let input = new FormData;
+    input.append('formId',this.model._id);
+    input.append('attributes',JSON.stringify(this.model.attributes))
+
+    // this.us.postDataApi('/user/formFill',input).subscribe(r=>{
+    //   console.log(r);
+    //   swal('Success','You have contact sucessfully','success');
+    //   this.success = true;
+    // },error=>{
+    //   swal('Error',error.message,'error');
+    // });
+  }
 
 }

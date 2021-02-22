@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { field, value } from '../global.model';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import swal from 'sweetalert2';
 import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
 import {FetcherService} from '../fetcher.service'
@@ -176,7 +176,8 @@ export class EditAppComponent implements OnInit {
   
 
   constructor(
-    private route:ActivatedRoute, private fetchService: FetcherService
+    private route:ActivatedRoute, private fetchService: FetcherService,
+    private router:Router
   ) { }
 
   sendIndex: number = 1;
@@ -244,7 +245,6 @@ export class EditAppComponent implements OnInit {
     });
 
   }
-
 
   updateForm(){
     // let input = new FormData;

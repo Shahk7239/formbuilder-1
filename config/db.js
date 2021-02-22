@@ -1,4 +1,5 @@
 const mysql = require("mysql");
+var dbName = require("./dbName") //will change based on new database creation
 
 module.exports = async () =>
   new Promise((resolve, reject) => {
@@ -6,7 +7,7 @@ module.exports = async () =>
       host: "localhost",
       user: "root",
       password: "admin",
-      database: "sys",
+      database: dbName,
     });
     connection.connect((error) => {
       if (error) {

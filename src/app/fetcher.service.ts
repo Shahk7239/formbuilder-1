@@ -11,15 +11,16 @@ import { catchError, retry } from 'rxjs/operators';
 })
 export class FetcherService {
   public serverUrl = "http://localhost:3000/";
+
   constructor(private httpClient: HttpClient) { }
 
   getForms(): Observable< any > {
-    console.log("at your service")
+    //console.log("at your service")
     return new Observable(observer => {
       var dummy = {"test":"body"}
-      this.httpClient.get("http://localhost:3000/page1")
+      this.httpClient.get("http://localhost:3000/api/getform")
         .subscribe(res => {
-          console.log(res)
+          //console.log(res)
           observer.next( res);
         }, err => {
           observer.error(err);
@@ -28,14 +29,14 @@ export class FetcherService {
   }
 
   putForms(model): Observable< any > {
-    console.log("at your service")
-    console.log( typeof (model))
+    //console.log("at your service")
+    //console.log( typeof (model))
     return new Observable(observer => {
-      console.log('i am in service')
-      var dummy = {"stringVal":model}
-      this.httpClient.post("http://localhost:3000/putforms/",dummy)
+      //console.log('i am in service')
+      var body = {"id":4,"formJSON":model}
+      this.httpClient.post("http://localhost:3000/api/postform/",body)
         .subscribe(res => {
-          console.log(res)
+          //console.log(res)
           observer.next( res);
         }, err => {
           observer.error(err);
@@ -43,10 +44,11 @@ export class FetcherService {
     });
   }
 
+
   //Saveing screen data
   saveScreenData(screenData)
   {
-    console.log(screenData);
+    //console.log(screenData);
     return this.httpClient.post<any>("http://localhost:3000/api/postScreen",screenData)
         .pipe(
         retry(1),
