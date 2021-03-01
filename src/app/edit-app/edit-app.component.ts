@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { field, value } from '../global.model';
 import { ActivatedRoute, Router } from '@angular/router';
 import swal from 'sweetalert2';
@@ -158,6 +158,11 @@ export class EditAppComponent implements OnInit {
       "icon":"fa-paper-plane",
       "subtype": "submit",
       "label": "Submit"
+    },
+    {
+      "type": "signature",
+      "icon": "fa-pencil",
+      "label": "Signature",
     }
   ];
 
@@ -180,10 +185,10 @@ export class EditAppComponent implements OnInit {
     private router:Router
   ) { }
 
-  sendIndex: number = 1;
-  
+ 
   addForm() {
       this.dropArr.push(this.dropArr.length + 1);
+      this.fetchService.dropArr = this.dropArr;
   }
 
   onDragover(event:DragEvent) {
@@ -265,6 +270,8 @@ export class EditAppComponent implements OnInit {
   }
 
   ngOnInit() {
+
+    this.fetchService.dropArr = this.dropArr;
     // this.route.params.subscribe( params =>{
     //   console.log(params);
     //   this.us.getDataApi('/admin/getFormById',{id:params.id}).subscribe(r=>{

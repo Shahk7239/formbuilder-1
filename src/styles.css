@@ -74,7 +74,7 @@
     opacity:0.3;
 }
 .dndPlaceholder{
-    background: rgb(206, 238, 238); border-radius: 2px; padding: 20px;
+    background: rgb(206, 238, 238); border-radius: 2px; padding: 30px;
     margin-bottom:10px;
 }
 .field .fa{
@@ -113,7 +113,7 @@
 }
 
 .colorpick{
-    height: 25px;
+    height: 35px;
     background: white;
     border: none;
 }

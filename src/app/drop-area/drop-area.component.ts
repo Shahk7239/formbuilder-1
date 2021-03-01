@@ -163,7 +163,12 @@ export class DropAreaComponent implements OnInit {
       "icon":"fa-paper-plane",
       "subtype": "submit",
       "label": "Submit"
-    }
+    },
+    {
+      "type": "signature",
+      "icon": "fa-signature",
+      "label": "Signature",
+    },
   ];
   modelFields:Array<field>=[];
   model:any = {
@@ -177,11 +182,6 @@ export class DropAreaComponent implements OnInit {
     attributes:this.modelFields
   };
   
-  ngOnInit() {
-    console.log('in ngOnINit')
-    //this.getAvailableForms();
-    //this.pushAvailableForms()
-  }
 
   onDragover(event:DragEvent) {
     console.log("dragover", JSON.stringify(event, null, 2));
@@ -243,6 +243,16 @@ export class DropAreaComponent implements OnInit {
 
   }
 
+  //@Input() sendIndex:number;
+
+  deleteForm(i){
+    console.log(this.fetchService.dropArr);
+    this.fetchService.dropArr.splice(i-1,1);
+    if(this.fetchService.dropArr.length == 1)
+    this.fetchService.dropArr = []
+  }
+
+
   updateForm(){
     let input = new FormData;
     input.append('id',this.model._id);
@@ -279,27 +289,49 @@ export class DropAreaComponent implements OnInit {
   }
 
 
+  ngOnInit() {
+    console.log('in ngOnINit')
+    //console.log(this.fetchService.screenData);
+    if(localStorage.getItem('model') != null)
+    {
+      this.fetchService.model = JSON.parse(localStorage.getItem('model'));
+      this.fetchService.screenData = JSON.parse(localStorage.getItem('screen'));
+      this.model = JSON.parse(localStorage.getItem('model'));
+      this.fetchService.getMeta(this.fetchService.screenData["orgname"],this.fetchService.model["name"], this.fetchService.screenData["screenid"])
+      .subscribe((res)=>{
+        console.log("Recieved from DB")
+        this.model = JSON.parse(res[0].FormJSON); 
+        localStorage.removeItem('model');   
+        localStorage.setItem('model',JSON.stringify(this.model));
+      });
+    }
+  }
+
 
   toggleValue(item){
     item.selected = !item.selected;
   }
 
   getAvailableForms(){
-    
-    this.fetchService.getForms().subscribe((res)=>{console.log(res)})
-
-    // this.fetchService.getForms()
-    //   .subscribe(res => {
-    //     console.log("got res")
-    //     console.log(res);
-    //   }, err => {
-    //     console.log(err);
-    //   }); 
+    //this.fetchService.getForms().subscribe((res)=>{console.log(res)})
   }
 
-  // pushAvailableForms(){
-  //   this.fetchService.putForms().subscribe((res)=>{console.log(res)})
-  // }
+  deleteAttributes(){
+    swal({
+      title: 'Delete Template?',
+      text: "Do you want to remove all fields?",
+      type: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#00B96F',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes!'
+    }).then((result) => {
+      if (result.value) {
+        this.model.attributes = this.modelFields;
+      }
+    });
+  }
+
 
   submit(){
     let valid = true;
@@ -349,11 +381,69 @@ export class DropAreaComponent implements OnInit {
     this.value={label:"",value:""};
   }
 
-  putForm(){
-    let valstring = JSON.stringify(this.model.attributes);
-    this.fetchService.putForms(valstring).subscribe(res=>{
-      console.log(res)
-    })
+  async saveForm(){
+    //Saving locally and in Service
+    this.fetchService.model = this.model;
+    if(localStorage.getItem('model') === null)
+    {
+      
+      (await this.fetchService.postScreen(this.fetchService.screenData))
+      .subscribe((data:{}) =>{
+      console.log(data);
+      });
+
+      (await this.fetchService.createMeta(this.model["name"]))
+      .subscribe(async (data:{}) =>{
+        console.log(data);
+
+        (await this.fetchService.postMeta(this.model["name"],"1","ID",JSON.stringify(this.model),this.fetchService.screenData["screenid"]))
+        .subscribe((data:{}) =>{
+        console.log(data);
+        });
+
+      });
+
+      alert("Saved Template"); 
+
+      var attr = this.model.attributes;
+      var attrArray = []
+      for(var i=0;i<attr.length;i++)
+      {
+        if(this.model.attributes[i].label != "Submit")
+          attrArray.push(this.model.attributes[i].label);
+      }
+      const body = {"formID":"ID","labels":attrArray};
+      
+      (await this.fetchService.createForm(body))
+      .subscribe((data:{}) =>{
+        console.log(data);
+      });
+    }
+    else
+    { 
+      //Put request
+      this.fetchService.putMeta(this.fetchService.screenData["orgname"],this.model["name"],"ID",JSON.stringify(this.model))
+      .subscribe((data:{}) =>{
+        console.log(data);
+      });
+
+      //Alter columns
+      var attr = this.model.attributes;
+      var attrArray = []
+      for(var i=0;i<attr.length;i++)
+      {
+        if(this.model.attributes[i].label != "Submit")
+          attrArray.push(this.model.attributes[i].label);
+      }
+      const body = {"dbName":this.fetchService.screenData["orgname"],"formID":"ID","labels":attrArray};
+      
+        this.fetchService.alterForm(body)
+         .subscribe((data:{}) =>{
+         console.log(data);
+      });
+    }
+    localStorage.removeItem('model');   
+    localStorage.setItem('model',JSON.stringify(this.model));
   }
 
 }

@@ -9,7 +9,7 @@ import { ViewFormComponent } from './view-form/view-form.component';
 const routes: Routes = [
   {path: '', component: AddScreenComponent},
   {path: 'viewform', component: ViewFormComponent},
-  {path: 'create-form', component: EditAppComponent},
+  {path: 'createform', component: EditAppComponent},
   {path: '404', component:NotfoundComponent},
   {path: '**', redirectTo: '/404'}
 ];

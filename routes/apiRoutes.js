@@ -2,7 +2,8 @@ const express = require('express')
 const route = new express.Router()
 var connection = require('../config/db')
 const query = require('../config/query');
-var dbName = require("../config/dbName");
+var dbName = ""
+
 
 // route.get('/getforms',function(req,res){
 //   operations.getFormDataP().then(data=>{
@@ -32,52 +33,157 @@ var dbName = require("../config/dbName");
 //   }))
 // });
 
+route.post("/CreateDB", async (req,res) =>{
+  //console.log(req.body)
+  const { orgName } = req.body;
+  dbName = orgName;
+  const conn = await connection().catch(e => {});
+  const result = await query(conn, "Create Database "+orgName)
+  .catch((err) => {res.status(400).send(err);})
+  res.json({ Message: 'Created Database' });
+});
+
+route.post("/createScreen", async (req,res) =>{
+  const conn = await connection().catch(e => {});
+  const result = await query(conn,"CREATE TABLE "+dbName+".`screen` (`Version` int NOT NULL,`OrgName` varchar(45) NOT NULL,`OrgID` varchar(45) NOT NULL,`ScreenName` varchar(45) NOT NULL,`ScreenID` varchar(45) NOT NULL,`TimeStamp` datetime NOT NULL,PRIMARY KEY (`OrgID`,`ScreenID`))")
+  .catch((err) => {res.status(400).send(err);})
+  res.json({ Message: 'Created Screen table' });
+});
 
 route.post("/postScreen", async (req, res) => {
   //console.log(req.body)
-  const {version,orgName,orgID, screenName,screenNo,time,formID,JSON} = req.body;
+  const {version,orgName,orgID,screenName,screenID} = req.body;
   const conn = await connection().catch(e => { });
-  const result = await query(conn, "INSERT INTO `screen_table` VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-  [version, orgName, orgID, screenName, screenNo, time, formID, JSON]).catch((err) => { res.status(400).send(err); })
-  res.status(200).json({ Message: 'Got it' });
+  const result = await query(conn, "INSERT INTO "+dbName+".`screen` VALUES (?, ?, ?, ?, ?, now())",
+  [version, orgName, orgID, screenName, screenID, new Date()]).catch((err) => { res.status(400).send(err); })
+  res.json({ Message: 'Received Screen Data' });
 });
 
 
-//Mohan
-route.get("/getform", async (req,res) => {
-  const conn = await connection().catch(e => {});
-  const results = await query(conn,'SELECT formJSON FROM form').
-  catch((err) => { res.status(400).json(err);})
-  res.status(200).send(results);
+route.post("/createMeta", async (req, res) => {
+  const {formName} = req.body;
+  const conn = await connection().catch(e => { });
+  const result = await query(conn, "CREATE TABLE "+dbName+".`"+formName+"` (`FormVersion` varchar(40) NOT NULL,`FormID` varchar(45) NOT NULL,`FormJSON` JSON NOT NULL,`ScreenID` varchar(45) NOT NULL,PRIMARY KEY (FormID))")
+  .catch((err) => { res.status(400).send(err); })
+  res.json({ Message: 'Created Meta Form table' });
 });
 
-route.post("/postform", async (req,res) =>{
+route.post("/postMeta", async (req, res) => {
+  const {formName,formVersion,formID, formJSON, screenID} = req.body;
+  const conn = await connection().catch(e => { });
+  const result = await query(conn, "INSERT INTO "+dbName+".`"+formName+"` VALUES (?, ?, ?, ?)",
+  [formVersion,formID,formJSON,screenID]).catch((err) => { res.status(400).send(err); })
+  res.json({ Message: 'Received Meta Form Data' });
+});
+
+route.put("/putMeta", async (req, res) => {
+  const {dbName,formName, formID,formJSON} = req.body;
+  const conn = await connection().catch(e => { });
+  const qu = "UPDATE "+dbName+".`"+formName+"` SET FormJSON = '"+formJSON+"' where FormID='"+formID+"';"
+  //console.log(qu);
+  const result = await query(conn, qu)
+  .catch((err) => { res.status(400).json(err); })
+  res.json({Message:"Updated Meta Form"});
+});
+
+route.get("/getMeta/:dbName&:form&:screen", async (req, res) => {
+  const {dbName,form,screen} = req.params;
+  const conn = await connection().catch(e => { });
+  const qu="Select FormJSON from "+dbName+".`"+form+"` where ScreenID = \""+screen+"\"";
+  //console.log(qu);
+  const result = await query(conn, qu)
+  .catch((err) => { res.status(400).json(err); })
+  res.send(result);
+});
+
+
+route.post("/createForm", async (req, res) => {
+  const {formID,labels} = req.body;
+  var qu = "CREATE TABLE "+dbName+".`"+formID+"` (";
+  for(var i=0;i<labels.length;i++)
+  {
+    qu = qu+labels[i]+" varchar(50) DEFAULT NULL,";
+  }
+  qu = qu.slice(0,-1)
+  qu = qu+");";
+
+  //console.log(qu);
+  const conn = await connection().catch(e => { });
+  const result = await query(conn, qu)
+  .catch((err) => { res.status(400).send(err); })
+  res.status(200).json({ Message: 'Created Form table' });
+});
+
+
+route.post("/postForm", async (req, res) => {
   //console.log(req.body)
-  const { id,formJSON } = req.body;
-  const conn = await connection().catch(e => {});
-  const result = await query(conn, "INSERT INTO "+dbName+".`form` (id, formJSON) VALUES (?, ?)",
-  [id, formJSON]).catch((err) => {res.status(400).send(err);})
-  res.status(200).json({ Message: 'Got it' });
+  const {dbName,formID,values,labels} = req.body;
+  var qu = "INSERT INTO "+dbName+".`"+formID+"` ( ";
+
+  for(var i=0;i<labels.length;i++)
+  {
+    qu = qu+labels[i]+',';
+  }
+  qu = qu.slice(0,-1)
+  qu = qu+") ";
+
+  qu = qu + "VALUES(";
+  for(var i=0;i<values.length;i++)
+  {
+    qu = qu+'"'+values[i]+'",';
+  }
+  qu = qu.slice(0,-1)
+  qu = qu+");";
+
+  //console.log(qu);
+  const conn = await connection().catch(e => { });
+  const result = await query(conn, qu)
+  .catch((err) => { res.status(400).send(err); })
+  res.status(200).json({ Message: 'Posted Form Data' });
 });
 
-route.post("/CreateDB", async (req,res) =>{
-  //console.log(req.body)
-  const { name } = req.body;
-  dbName = name;
-  const conn = await connection().catch(e => {});
-  const result = await query(conn, "Create Database "+name)
-  .catch((err) => {res.status(400).send(err);})
-  res.status(200).json({ Message: 'Created Database' });
+
+route.post("/putCols", async (req, res) => {
+  const {dbName,formID,labels} = req.body;
+  const conn = await connection().catch(e => { });
+  const result = await query(conn, "Show columns from "+dbName+"."+formID)
+  .catch((err) => { res.status(400).json(err); })
+  var existingCols = []
+  result.map((obj)=>{existingCols.push(obj["Field"])})
+  
+  var qu = "Alter Table "+dbName+"."+formID+" ";
+  for(var i=0;i<labels.length;i++)
+  {
+    if(!existingCols.includes(labels[i]))
+    {
+      qu = qu + "Add "+labels[i]+" varchar(50) DEFAULT NULL,";
+    }
+  }
+  qu = qu.slice(0,-1);
+  qu = qu + ";";
+
+  //console.log(qu);
+  const ans = await query(conn, qu)
+  .catch((err) => { res.status(400).json(err); })
+  res.json({Message:"Altered Table"});
 });
 
-route.post("/CreateTable", async (req,res) =>{
-  //console.log(req.body)
-  const { name } = req.body;
-  const conn = await connection().catch(e => {});
-  const result = await query(conn, "Create Table "+dbName+"."+name+"(type VARCHAR(100), name VARCHAR(100) NOT NULL, value VARCHAR(250) NOT NULL, PRIMARY KEY (name));")
-  .catch((err) => {res.status(400).send(err);})
-  res.status(200).json({ Message: 'Created Table' });
-});
+
+// route.get("/getform", async (req,res) => {
+//   const conn = await connection().catch(e => {});
+//   const results = await query(conn,'SELECT formJSON FROM form').
+//   catch((err) => { res.status(400).json(err);})
+//   res.status(200).send(results);
+// });
+
+// route.post("/postform", async (req,res) =>{
+//   //console.log(req.body)
+//   const { id,formJSON } = req.body;
+//   const conn = await connection().catch(e => {});
+//   const result = await query(conn, "INSERT INTO "+dbName+".`form` (id, formJSON) VALUES (?, ?)",
+//   [id, formJSON]).catch((err) => {res.status(400).send(err);})
+//   res.status(200).json({ Message: 'Got it' });
+// });
 
 
 route.post("/DropTable", async (req,res) =>{

@@ -5,14 +5,14 @@
             <!-- <button (click)="initReport()" class="btn btn-primary pull-left">Response</button> -->
             <button (click)="addForm()" class="btn btn-primary pull-right" style="margin-left:3px;">Add Form</button>
             <button (click)="updateForm()" class="btn btn-primary pull-right">Update</button>
-            <button routerLink="/viewform" class="btn btn-primary pull-right" style="margin-right:3px;">View <i class="fa fa-external-link"></i></button>
+            <button routerLink="/viewform"  class="btn btn-success pull-right" style="margin-right:3px;">View <i class="fa fa-external-link"></i></button>
           
           </div>
     </div>
   </div>
   <div class="spacer30"></div>
-  <div class="row">
-    <div class="col-4">
+  <div class="row" >
+    <div class="col-4" style="overflow:hidden;float: left;" >
 
         <!-- <div class="row">
         <label class="col-8">Background Color</label>
@@ -23,7 +23,7 @@
         <input class="colorpick col-4" type="color" name="textColor" [(ngModel)]="model.theme.textColor">    
         </div> -->
 
-      <h4 (click)="test()">Select Fields</h4>
+      <h4 (click)="test()" style="margin-top: 30px;">Select Fields</h4>
       <p>Customize your form by drag and drop below fields to the form area.</p>
       <!--a draggable element-->
       <div class="fields" *ngFor="let item of fieldModels">
@@ -34,16 +34,17 @@
           <h5>{{item.label}}</h5>
         </div>
       </div>
-
     </div>
+
+    <!--style="overflow-x:hidden;overflow-y:scroll;float:right;height: 700px;"-->
     <div class="col-8">
 
       <!--a dropzone-->
       <!--to allow dropping content that is not [dndDraggable] set dndAllowExternal to true-->
-      <div *ngFor="let drop of dropArr" style="margin-top:165px">
+      <div *ngFor="let drop of dropArr.slice().reverse()" style="margin-top:70px;">
         <h2>Template {{drop}}</h2>
         <hr>
-        <app-drop-area [indexval]="drop"></app-drop-area>
+        <app-drop-area [indexval]="drop" ></app-drop-area>
       </div>
 
     </div>
@@ -74,21 +75,12 @@
         <div *ngIf="reports?.length == 0" class="col-12 btn-cont">
             No response found
         </div>
-
     </div>
-
 </div>
 
-<!-- <pre *ngIf="model">{{model|json}}</pre> -->
+<div *ngIf="model" class="container marginT60  marginB30" style="max-width:500px;">
 
 
-<div *ngIf="model" 
-class="container marginT60  marginB30" 
-style="max-width:500px;"
->
-
-
-
-<pre *ngIf="show==1 && model">
+<!-- <pre *ngIf="show==1 && model">
     {{model|json}}
-</pre>
+</pre> -->

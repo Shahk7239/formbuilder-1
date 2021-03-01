@@ -2,19 +2,17 @@
 style="margin:0px; margin-top: 10px; background: #f2f2f2;"
 [style.backgroundColor]="model.theme.bgColor"
 [style.color]="model.theme.textColor">
-<h3 style="padding: 10px; text-decoration: underline;">Template {{this.indexval}} >> Form:</h3>
-  <div class="col-12">
-    <h5>{{model.name}}</h5>  
-  </div>
-  <div class="col-12">
-    <p>{{model.description}}</p>  
+<!-- <h3 style="padding: 10px; text-decoration: underline;">Template {{this.indexval}} >> Form:</h3> -->
+  <div class="col-12" style="margin-top: 8px;">
+    <h5 style="text-transform: uppercase;display: inline">{{model.name}}</h5>
+    <label>&nbsp; -- &nbsp;  </label><h6 style="display: inline">{{model.description}}</h6>
   </div>
   <div *ngIf="success" class="col-12">
     <div class="form-group">
     <label>Your form has been submitted.</label>
     </div>
   </div>
-  <form class="ftheme" >
+  <form class="ftheme" style="margin-top: 30px;" >
   <div *ngIf="!success" class="col-12">
     <div *ngFor="let item of model.attributes" class="form-group">
       <div *ngIf="item.type=='text'">
@@ -36,6 +34,12 @@ style="margin:0px; margin-top: 10px; background: #f2f2f2;"
       <div *ngIf="item.type=='date'">
         <label>{{item.label}}</label> <label *ngIf="item.required" class="text-danger">*</label>
         <input type="date" class="form-control" id="{{item.name}}" placeholder="{{item.placeholder}}" [(ngModel)]="item.value" [ngModelOptions]="{standalone: true}" autocomplete="off">
+      </div>
+      <div *ngIf="item.type=='signature'" >
+        <signature-pad #sigPad accept="accept" style="background-color: burlywood;" clear="clear" style="min-width: 1em;" height="220" width="568" disabled="false"></signature-pad>
+        <p style="white-space: pre-wrap"></p>
+        <button type="button" class="btn btn-primary" style="margin-top: 1em; margin-right: 1em;" (click)="sigPad.clear()">Clear signature</button>
+        <button type="button" class="btn btn-primary" style="margin-top: 1em;" (click)="drawComplete()">Sign</button>
       </div>
       <div *ngIf="item.type=='datetime-local'">
         <label>{{item.label}}</label> <label *ngIf="item.required" class="text-danger">*</label>
@@ -72,9 +76,10 @@ style="margin:0px; margin-top: 10px; background: #f2f2f2;"
       </div>
       <div *ngIf="item.type=='radio'">
           <label>{{item.label}}</label> <label *ngIf="item.required" class="text-danger">*</label>
-          <div *ngFor="let v of item.values" class="inline-form-group">
+          <div *ngFor="let v of item.values" class="inline-form-group" style="display: inline-block;">
               <label class="cust-check-bx">
-                <input type="radio" [value]="v.value" name="{{item.name}}" [(ngModel)]="item.value" [ngModelOptions]="{standalone: true}"> {{v.label}}
+                <input type="radio" [value]="v.value" name="{{item.name}}"
+                style="margin-left: 20px;" [(ngModel)]="item.value" [ngModelOptions]="{standalone: true}"> {{v.label}}
                 <span class="checkmark"></span>
               </label>
             </div>
@@ -84,8 +89,12 @@ style="margin:0px; margin-top: 10px; background: #f2f2f2;"
       </div>
     </div>
     <hr />
-    <p (click)="show=1" class="marginT60 pointer">Show developer data</p>
+    <!-- <p (click)="show=1" class="marginT60 pointer">Show developer data</p> -->
 
   </div>
   </form>
 </div>
+
+<pre>
+  {{model|json}}
+</pre>

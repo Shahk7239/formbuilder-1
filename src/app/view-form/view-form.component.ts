@@ -163,6 +163,11 @@ export class ViewFormComponent implements OnInit {
       "icon":"fa-paper-plane",
       "subtype": "submit",
       "label": "Submit"
+    },
+    {
+      "type": "signature",
+      "icon": "fa-pencil",
+      "label": "Signature",
     }
   ];
   modelFields:Array<field>=[];
@@ -178,10 +183,18 @@ export class ViewFormComponent implements OnInit {
   };
   
   ngOnInit() {
-    console.log('in ngOnINit')
     this.getAvailableForms();
   }
 
+  getAvailableForms(){
+    //console.log(this.fetchService.screenData);
+    this.fetchService.getMeta(this.fetchService.screenData["orgname"],this.fetchService.model["name"], this.fetchService.screenData["screenid"])
+    .subscribe((res)=>{
+      console.log("Recieved from DB")
+      this.model = JSON.parse(res[0].FormJSON);      
+    })
+    
+  } 
 
   initReport(){
     this.report = true; 
@@ -207,17 +220,6 @@ export class ViewFormComponent implements OnInit {
     item.selected = !item.selected;
   }
 
-  getAvailableForms(){
-    
-    this.fetchService.getForms().subscribe((res)=>{
-      
-      this.model.attributes = JSON.parse(res[3].formJSON);
-      //console.log(this.model.attributes);
-      
-    })
-      
-  } 
-
   submit(){
     let valid = true;
     let validationArray = JSON.parse(JSON.stringify(this.model.attributes));
@@ -238,21 +240,51 @@ export class ViewFormComponent implements OnInit {
       }
       if(field.required && field.type == 'checkbox'){
         if(field.values.filter(r=>r.selected).length == 0){
-          swal('Error','Please enterrr '+field.label,'error');
+          swal('Error','Please enter '+field.label,'error');
           valid = false;
           return false;
         }
-
       }
     });
     if(!valid){
       return false;
-    }
-    console.log("Saved")
-    for(var i=0;i<this.model.attributes.length;i++)
+    }   
+
+    //Saving to DB
+    var attr = this.model.attributes;
+    var labels = []
+    var values = []
+
+    for(var i=0;i<attr.length;i++)
     {
-      console.log(this.model.attributes[i].label +  " - " + this.model.attributes[i].value);
+        if(attr[i].label != "Submit" && attr[i].value !== undefined && attr[i].value != ""){
+          labels.push(attr[i].label);
+          values.push(attr[i].value);
+        }
+        if(attr[i].type === "checkbox")
+        {
+          labels.push(attr[i].label);
+          var checkBox = attr[i].values;
+          var val = ""
+          checkBox.map((obj)=> {
+            if(obj.selected === true)
+            {
+              val = val + obj.value + ", ";
+            }
+          })
+          val = val.slice(0,-2);
+          values.push(val);
+          //console.log(val);
+        }
     }
+    if(labels.length > 0){
+      var body = {"dbName":this.fetchService.screenData["orgname"],"formID":"ID","labels":labels,"values" :values};
+      (this.fetchService.postForm(body))
+      .subscribe((data:{}) =>{
+        console.log(data);
+      });
+    }
+    this.clearInputs();
     let input = new FormData;
     input.append('formId',this.model._id);
     input.append('attributes',JSON.stringify(this.model.attributes))
@@ -264,6 +296,18 @@ export class ViewFormComponent implements OnInit {
     // },error=>{
     //   swal('Error',error.message,'error');
     // });
+  }
+
+  clearInputs(){
+    var attr = this.model.attributes;
+    for(var i=0;i<attr.length;i++)
+    {
+        if(attr[i].label != "Submit"){
+          attr[i].value = "";
+        }
+    }
+    this.model.attributes = attr;
+
   }
 
 }
