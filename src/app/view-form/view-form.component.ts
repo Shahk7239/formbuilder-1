@@ -1,8 +1,9 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit,ViewChild } from '@angular/core';
 import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
 import swal from 'sweetalert2';
 import { FetcherService } from '../fetcher.service';
 import { field, value } from '../global.model';
+import { SignaturePad } from 'ngx-signaturepad';
 
 @Component({
   selector: 'app-view-form',
@@ -15,6 +16,32 @@ export class ViewFormComponent implements OnInit {
     private fetchService: FetcherService
   ) { }
 
+  @ViewChild(SignaturePad) signaturePad: SignaturePad;
+   
+  private signaturePadOptions: Object = { // passed through to szimek/signature_pad constructor
+    'minWidth': 5,
+    'canvasWidth': 500,
+    'canvasHeight': 100,
+    'backgroundColor': '#FFFF88',
+  };
+
+ 
+  ngAfterViewInit() {
+    // this.signaturePad is now available
+    this.signaturePad.set('minWidth', 5); // set szimek/signature_pad options at runtime
+    this.signaturePad.clear(); // invoke functions from szimek/signature_pad API
+  }
+
+  drawComplete() {
+    // will be notified of szimek/signature_pad's onEnd event
+    console.log(this.signaturePad.toDataURL('image/png'));
+  }
+ 
+   
+  drawStart() {
+    // will be notified of szimek/signature_pad's onBegin event
+    console.log('begin drawing');
+  }
   @Input() indexval: number;
   value:value={
     label:"",
@@ -188,11 +215,6 @@ export class ViewFormComponent implements OnInit {
 
   getAvailableForms(){
     //console.log(this.fetchService.screenData);
-    this.fetchService.getMeta(this.fetchService.screenData["orgname"],this.fetchService.model["name"], this.fetchService.screenData["screenid"])
-    .subscribe((res)=>{
-      console.log("Recieved from DB")
-      this.model = JSON.parse(res[0].FormJSON);      
-    })
     
   } 
 
@@ -201,17 +223,7 @@ export class ViewFormComponent implements OnInit {
     let input = {
       id:this.model._id
     }
-    // this.us.getDataApi('/admin/allFilledForms',input).subscribe(r=>{
-    //   this.reports = r.data;
-    //   console.log('reports',this.reports);
-    //   this.reports.map(records=>{
-    //     return records.attributes.map(record=>{
-    //       if(record.type=='checkbox'){
-    //         record.value = record.values.filter(r=>r.selected).map(i=>i.value).join(',');
-    //       }
-    //     })
-    //   });
-    // });
+    
   }
 
 
@@ -250,40 +262,45 @@ export class ViewFormComponent implements OnInit {
       return false;
     }   
 
-    //Saving to DB
-    var attr = this.model.attributes;
-    var labels = []
-    var values = []
+    // //Saving to DB
+    // var attr = this.model.attributes;
+    // var labels = []
+    // var values = []
 
-    for(var i=0;i<attr.length;i++)
-    {
-        if(attr[i].label != "Submit" && attr[i].value !== undefined && attr[i].value != ""){
-          labels.push(attr[i].label);
-          values.push(attr[i].value);
-        }
-        if(attr[i].type === "checkbox")
-        {
-          labels.push(attr[i].label);
-          var checkBox = attr[i].values;
-          var val = ""
-          checkBox.map((obj)=> {
-            if(obj.selected === true)
-            {
-              val = val + obj.value + ", ";
-            }
-          })
-          val = val.slice(0,-2);
-          values.push(val);
-          //console.log(val);
-        }
-    }
-    if(labels.length > 0){
-      var body = {"dbName":this.fetchService.screenData["orgname"],"formID":"ID","labels":labels,"values" :values};
-      (this.fetchService.postForm(body))
-      .subscribe((data:{}) =>{
-        console.log(data);
-      });
-    }
+    // for(var i=0;i<attr.length;i++)
+    // {
+    //     if(attr[i].label != "Submit" && attr[i].value !== undefined && attr[i].value != ""){
+    //       labels.push(attr[i].label.replace(/\s+/g, '_'));
+    //       values.push(attr[i].value);
+    //     }
+    //     if(attr[i].type === "checkbox")
+    //     {
+    //       labels.push(attr[i].label.replace(/\s+/g, '_'));
+    //       var checkBox = attr[i].values;
+    //       var val = ""
+    //       checkBox.map((obj)=> {
+    //         if(obj.selected === true)
+    //         {
+    //           val = val + obj.value + ", ";
+    //         }
+    //       })
+    //       val = val.slice(0,-2);
+    //       values.push(val);
+    //       //console.log(val);
+    //     }
+    // }
+    // if(labels.length > 0){
+    //   //console.log(labels)
+    //   //console.log(values)
+    //   var body = {"dbName":this.fetchService.screenData["orgname"],"formID":"ID","labels":labels,"values" :values};
+    //   (this.fetchService.postForm(body))
+    //   .subscribe((data:{}) =>{
+    //     console.log(data);
+    //   });
+    // }
+
+    
+    alert("Saved")
     this.clearInputs();
     let input = new FormData;
     input.append('formId',this.model._id);

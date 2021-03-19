@@ -270,19 +270,8 @@ export class EditAppComponent implements OnInit {
   }
 
   ngOnInit() {
-
     this.fetchService.dropArr = this.dropArr;
-    // this.route.params.subscribe( params =>{
-    //   console.log(params);
-    //   this.us.getDataApi('/admin/getFormById',{id:params.id}).subscribe(r=>{
-    //     console.log(r);
-    //     this.model = r['data'];
-    //   });
-    // });
-
-
-    // this.model = this.cs.data; 
-    // console.log(this.model.data);
+    
 
   }
 

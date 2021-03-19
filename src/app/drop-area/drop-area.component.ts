@@ -1,8 +1,9 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input,ViewChild } from '@angular/core';
 import { DndDropEvent,DropEffect} from 'ngx-drag-drop';
 import { field, value } from '../global.model';
 import swal from 'sweetalert2';
 import { FetcherService } from '../fetcher.service';
+import { SignaturePad } from 'ngx-signaturepad';
 
 @Component({
   selector: 'app-drop-area',
@@ -14,6 +15,33 @@ export class DropAreaComponent implements OnInit {
   constructor(
     private fetchService: FetcherService
   ) { }
+
+  @ViewChild(SignaturePad) signaturePad: SignaturePad;
+   
+  private signaturePadOptions: Object = { // passed through to szimek/signature_pad constructor
+    'minWidth': 5,
+    'canvasWidth': 500,
+    'canvasHeight': 100,
+    'backgroundColor': '#FFFF88',
+  };
+
+ 
+  ngAfterViewInit() {
+    // this.signaturePad is now available
+    this.signaturePad.set('minWidth', 5); // set szimek/signature_pad options at runtime
+    this.signaturePad.clear(); // invoke functions from szimek/signature_pad API
+  }
+
+  drawComplete() {
+    // will be notified of szimek/signature_pad's onEnd event
+    console.log(this.signaturePad.toDataURL('image/png'));
+  }
+ 
+   
+  drawStart() {
+    // will be notified of szimek/signature_pad's onBegin event
+    console.log('begin drawing');
+  }
 
   @Input() indexval: number;
   value:value={
@@ -263,10 +291,6 @@ export class DropAreaComponent implements OnInit {
     input.append('textColor',this.model.theme.textColor);
     input.append('attributes',JSON.stringify(this.model.attributes));
 
-    // this.us.putDataApi('/admin/updateForm',input).subscribe(r=>{
-    //   console.log(r);
-    //   swal('Success','App updated successfully','success');
-    // });
   }
 
 
@@ -275,36 +299,18 @@ export class DropAreaComponent implements OnInit {
     let input = {
       id:this.model._id
     }
-    // this.us.getDataApi('/admin/allFilledForms',input).subscribe(r=>{
-    //   this.reports = r.data;
-    //   console.log('reports',this.reports);
-    //   this.reports.map(records=>{
-    //     return records.attributes.map(record=>{
-    //       if(record.type=='checkbox'){
-    //         record.value = record.values.filter(r=>r.selected).map(i=>i.value).join(',');
-    //       }
-    //     })
-    //   });
-    // });
   }
 
 
   ngOnInit() {
     console.log('in ngOnINit')
     //console.log(this.fetchService.screenData);
-    if(localStorage.getItem('model') != null)
-    {
-      this.fetchService.model = JSON.parse(localStorage.getItem('model'));
-      this.fetchService.screenData = JSON.parse(localStorage.getItem('screen'));
-      this.model = JSON.parse(localStorage.getItem('model'));
-      this.fetchService.getMeta(this.fetchService.screenData["orgname"],this.fetchService.model["name"], this.fetchService.screenData["screenid"])
-      .subscribe((res)=>{
-        console.log("Recieved from DB")
-        this.model = JSON.parse(res[0].FormJSON); 
-        localStorage.removeItem('model');   
-        localStorage.setItem('model',JSON.stringify(this.model));
-      });
-    }
+
+      // this.fetchService.getMeta(this.fetchService.screenData["orgname"],this.fetchService.model["name"], this.fetchService.screenData["screenid"])
+      // .subscribe((res)=>{
+      //   console.log("Recieved from DB")
+      //   this.model = JSON.parse(res[0].FormJSON); 
+      // });
   }
 
 
@@ -327,7 +333,7 @@ export class DropAreaComponent implements OnInit {
       confirmButtonText: 'Yes!'
     }).then((result) => {
       if (result.value) {
-        this.model.attributes = this.modelFields;
+        this.model.attributes = [];
       }
     });
   }
@@ -376,74 +382,66 @@ export class DropAreaComponent implements OnInit {
     // });
   }
   
+
   addValue(values){
     values.push(this.value);
     this.value={label:"",value:""};
   }
 
   async saveForm(){
-    //Saving locally and in Service
-    this.fetchService.model = this.model;
-    if(localStorage.getItem('model') === null)
-    {
+    // //Saving locally and in Service
+    // this.fetchService.model = this.model;
+    //   (await this.fetchService.postScreen(this.fetchService.screenData))
+    //   .subscribe((data:{}) =>{
+    //   console.log(data);
+    //   });
+
+    //   (await this.fetchService.createMeta(this.model["name"]))
+    //   .subscribe(async (data:{}) =>{
+    //     console.log(data);
+
+    //     (await this.fetchService.postMeta(this.model["name"],"1","ID",JSON.stringify(this.model),this.fetchService.screenData["screenid"]))
+    //     .subscribe((data:{}) =>{
+    //     console.log(data);
+    //     });
+
+    //   });
+
+    //   alert("Saved Template"); 
+
+    //   var attr = this.model.attributes;
+    //   var attrArray = []
+    //   for(var i=0;i<attr.length;i++)
+    //   {
+    //     if(this.model.attributes[i].label != "Submit")
+    //       attrArray.push(this.model.attributes[i].label.replace(/\s+/g, '_'));
+    //   }
+    //   const body = {"formID":"ID","labels":attrArray};
       
-      (await this.fetchService.postScreen(this.fetchService.screenData))
-      .subscribe((data:{}) =>{
-      console.log(data);
-      });
+    //   (await this.fetchService.createForm(body))
+    //   .subscribe((data:{}) =>{
+    //     console.log(data);
+    //   });
 
-      (await this.fetchService.createMeta(this.model["name"]))
-      .subscribe(async (data:{}) =>{
-        console.log(data);
+    //   //Put request
+    //   this.fetchService.putMeta(this.fetchService.screenData["orgname"],this.model["name"],"ID",JSON.stringify(this.model))
+    //   .subscribe((data:{}) =>{
+    //     console.log(data);
+    //   });
 
-        (await this.fetchService.postMeta(this.model["name"],"1","ID",JSON.stringify(this.model),this.fetchService.screenData["screenid"]))
-        .subscribe((data:{}) =>{
-        console.log(data);
-        });
-
-      });
-
-      alert("Saved Template"); 
-
-      var attr = this.model.attributes;
-      var attrArray = []
-      for(var i=0;i<attr.length;i++)
-      {
-        if(this.model.attributes[i].label != "Submit")
-          attrArray.push(this.model.attributes[i].label);
-      }
-      const body = {"formID":"ID","labels":attrArray};
-      
-      (await this.fetchService.createForm(body))
-      .subscribe((data:{}) =>{
-        console.log(data);
-      });
-    }
-    else
-    { 
-      //Put request
-      this.fetchService.putMeta(this.fetchService.screenData["orgname"],this.model["name"],"ID",JSON.stringify(this.model))
-      .subscribe((data:{}) =>{
-        console.log(data);
-      });
-
-      //Alter columns
-      var attr = this.model.attributes;
-      var attrArray = []
-      for(var i=0;i<attr.length;i++)
-      {
-        if(this.model.attributes[i].label != "Submit")
-          attrArray.push(this.model.attributes[i].label);
-      }
-      const body = {"dbName":this.fetchService.screenData["orgname"],"formID":"ID","labels":attrArray};
-      
-        this.fetchService.alterForm(body)
-         .subscribe((data:{}) =>{
-         console.log(data);
-      });
-    }
-    localStorage.removeItem('model');   
-    localStorage.setItem('model',JSON.stringify(this.model));
+    //   //Alter columns
+    //   var attr = this.model.attributes;
+    //   var attrArray = []
+    //   for(var i=0;i<attr.length;i++)
+    //   {
+    //     if(this.model.attributes[i].label != "Submit")
+    //       attrArray.push(this.model.attributes[i].label.replace(/\s+/g, '_'));
+    //   }
+    //   const bodyy = {"dbName":this.fetchService.screenData["orgname"],"formID":"ID","labels":attrArray};
+    //     this.fetchService.alterForm(bodyy)
+    //      .subscribe((data:{}) =>{
+    //      console.log(data);
+    //   });
   }
 
 }
