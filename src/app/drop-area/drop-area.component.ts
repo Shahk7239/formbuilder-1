@@ -304,22 +304,11 @@ export class DropAreaComponent implements OnInit {
 
   ngOnInit() {
     console.log('in ngOnINit')
-    //console.log(this.fetchService.screenData);
-
-      // this.fetchService.getMeta(this.fetchService.screenData["orgname"],this.fetchService.model["name"], this.fetchService.screenData["screenid"])
-      // .subscribe((res)=>{
-      //   console.log("Recieved from DB")
-      //   this.model = JSON.parse(res[0].FormJSON); 
-      // });
   }
 
 
   toggleValue(item){
     item.selected = !item.selected;
-  }
-
-  getAvailableForms(){
-    //this.fetchService.getForms().subscribe((res)=>{console.log(res)})
   }
 
   deleteAttributes(){
@@ -389,12 +378,45 @@ export class DropAreaComponent implements OnInit {
   }
 
   async saveForm(){
-    // //Saving locally and in Service
-    // this.fetchService.model = this.model;
-    //   (await this.fetchService.postScreen(this.fetchService.screenData))
-    //   .subscribe((data:{}) =>{
-    //   console.log(data);
-    //   });
+    
+    var date = new Date();
+    var formid =
+      ("00" + (date.getMonth() + 1)).slice(-2) + "-" +
+      ("00" + date.getDate()).slice(-2) + "-" +
+      date.getFullYear() + " " +
+      ("00" + date.getHours()).slice(-2) + ":" +
+      ("00" + date.getMinutes()).slice(-2) + ":" +
+      ("00" + date.getSeconds()).slice(-2);
+
+      console.log(formid);
+      this.fetchService.postScreen(this.fetchService.screenData,"Yes","No")
+      .subscribe((data:{}) =>{
+          console.log(data);
+
+          this.fetchService.postScreenForm(formid,this.fetchService.screenData["screenid"],this.model.name,this.model.description)
+          .subscribe((data:{}) =>{
+          console.log(data);
+
+            this.fetchService.postForm(formid,this.model.name,this.fetchService.screenData["adminid"],"Yes","No")
+            .subscribe((data:{}) =>{
+            console.log(data);
+            for(var i=0;i<this.model.attributes.length;i++)
+            {
+              this.fetchService.postFormField(this.model.attributes[i].label,formid,JSON.stringify(this.model.attributes[i]))
+              .subscribe((data:{}) =>{
+              console.log(data);
+              });
+            }
+            
+            this.fetchService.model = this.model;
+            alert("Saved in DB"); 
+            });
+          });
+    });
+      
+          
+    
+
 
     //   (await this.fetchService.createMeta(this.model["name"]))
     //   .subscribe(async (data:{}) =>{

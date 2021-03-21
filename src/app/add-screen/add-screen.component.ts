@@ -19,7 +19,7 @@ export class AddScreenComponent implements OnInit {
     'screenid': '',
     'adminid': '',
     'orgname': '',
-    'orgid': null,
+    'orgid': ''
   };
 
   ngOnInit(): void {

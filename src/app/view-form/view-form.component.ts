@@ -214,7 +214,12 @@ export class ViewFormComponent implements OnInit {
   }
 
   getAvailableForms(){
-    //console.log(this.fetchService.screenData);
+    
+    this.fetchService.getScreenForms().subscribe((res)=>{
+      console.log(res[0].ScreenFormID);
+
+      
+    });
     
   } 
 

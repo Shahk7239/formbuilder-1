@@ -19,73 +19,76 @@ export class FetcherService {
   constructor(private httpClient: HttpClient) { }
 
 
-  createDB(name)
-  {
-    const body = {"orgName":name}
-    return this.httpClient.post<any>(this.url+"/createDB",body)
-        .pipe(retry(1), catchError(this.handleError));
-  }
+  
+  //----------------------------- OLD SERVICES  -----------------
 
-  async createScreen()
-  {
-    const body={}
-    return await this.httpClient.post<any>(this.url+"/createScreen",body)
-      .pipe(retry(1), catchError(this.handleError));
-  }
+  // createDB(name)
+  // {
+  //   const body = {"orgName":name}
+  //   return this.httpClient.post<any>(this.url+"/createDB",body)
+  //       .pipe(retry(1), catchError(this.handleError));
+  // }
 
-  public version = 1;
-  async postScreen(data)
-  {
-    const body = {"version": this.version,"orgName":data.orgname,"orgID":data.adminid,"screenName":data.screenname,"screenID":data.screenid};
-    return await this.httpClient.post<any>(this.url+"/postScreen",body)
-        .pipe(retry(1),catchError(this.handleError));
-  }
+  // async createScreen()
+  // {
+  //   const body={}
+  //   return await this.httpClient.post<any>(this.url+"/createScreen",body)
+  //     .pipe(retry(1), catchError(this.handleError));
+  // }
 
-
-  async createMeta(formName)
-  {
-    const body = {"formName":formName}
-    return await this.httpClient.post<any>(this.url+"/createMeta",body)
-      .pipe(retry(1),catchError(this.handleError));
-  }
-  async postMeta(formName,formVersion,formID,formJSON,screenID)
-  {
-    const body = {"formName": formName,"formVersion":formVersion,"formID":formID,"formJSON":formJSON,"screenID":screenID};
-    return await this.httpClient.post<any>(this.url+"/postMeta",body)
-        .pipe(retry(1), catchError(this.handleError));
-  }
-
-  putMeta(dbName,formName,formID,formJSON)
-  {
-    const body = {"dbName":dbName,"formName": formName,"formID":formID,"formJSON":formJSON};
-    return this.httpClient.put<any>(this.url+"/putMeta",body)
-        .pipe(retry(1), catchError(this.handleError));
-  }
-
-  getMeta(dbName,formName,screenID)
-  {
-    return this.httpClient.get<any>(this.url+"/getMeta/"+dbName+"&"+formName+"&"+screenID)
-        .pipe(retry(1), catchError(this.handleError));
-  }
+  // public version = 1;
+  // async postScreen(data)
+  // {
+  //   const body = {"version": this.version,"orgName":data.orgname,"orgID":data.adminid,"screenName":data.screenname,"screenID":data.screenid};
+  //   return await this.httpClient.post<any>(this.url+"/postScreen",body)
+  //       .pipe(retry(1),catchError(this.handleError));
+  // }
 
 
-  async createForm(body)
-  {
-    return await this.httpClient.post<any>(this.url+"/createForm",body)
-      .pipe(retry(1),catchError(this.handleError));
-  }
+  // async createMeta(formName)
+  // {
+  //   const body = {"formName":formName}
+  //   return await this.httpClient.post<any>(this.url+"/createMeta",body)
+  //     .pipe(retry(1),catchError(this.handleError));
+  // }
+  // async postMeta(formName,formVersion,formID,formJSON,screenID)
+  // {
+  //   const body = {"formName": formName,"formVersion":formVersion,"formID":formID,"formJSON":formJSON,"screenID":screenID};
+  //   return await this.httpClient.post<any>(this.url+"/postMeta",body)
+  //       .pipe(retry(1), catchError(this.handleError));
+  // }
 
-  postForm(body)
-  {
-    return this.httpClient.post<any>(this.url+"/postForm",body)
-      .pipe(catchError(this.handleError));
-  }
+  // putMeta(dbName,formName,formID,formJSON)
+  // {
+  //   const body = {"dbName":dbName,"formName": formName,"formID":formID,"formJSON":formJSON};
+  //   return this.httpClient.put<any>(this.url+"/putMeta",body)
+  //       .pipe(retry(1), catchError(this.handleError));
+  // }
 
-  alterForm(body)
-  {
-    return this.httpClient.post<any>(this.url+"/putCols",body)
-      .pipe(catchError(this.handleError));
-  }
+  // getMeta(dbName,formName,screenID)
+  // {
+  //   return this.httpClient.get<any>(this.url+"/getMeta/"+dbName+"&"+formName+"&"+screenID)
+  //       .pipe(retry(1), catchError(this.handleError));
+  // }
+
+
+  // async createForm(body)
+  // {
+  //   return await this.httpClient.post<any>(this.url+"/createForm",body)
+  //     .pipe(retry(1),catchError(this.handleError));
+  // }
+
+  // postForm(body)
+  // {
+  //   return this.httpClient.post<any>(this.url+"/postForm",body)
+  //     .pipe(catchError(this.handleError));
+  // }
+
+  // alterForm(body)
+  // {
+  //   return this.httpClient.post<any>(this.url+"/putCols",body)
+  //     .pipe(catchError(this.handleError));
+  // }
   
   // getForms(): Observable< any > {
   //   return new Observable(observer => {
@@ -112,7 +115,68 @@ export class FetcherService {
 
 
 
-  //Handle errors for API calls
+
+  //------------------- NEW Services for NEW Schema -----------------
+
+  postScreen(data, Display, Modified)
+  {
+    const body = {"ScreenID":data.screenid,"ScreenName":data.screenname,
+      "CreatedBy":data.adminid, "Display":Display, "Modified":Modified};
+    return this.httpClient.post<any>(this.url+"/postScreen",body)
+        .pipe(catchError(this.handleError));
+  }
+
+
+  postScreenForm(ScreenFormID,ScreenID, FormName,FormDesc)
+  {
+    const body = {"ScreenFormID":ScreenFormID,"ScreenID":ScreenID,"FormName":FormName, "FormDesc":FormDesc};
+    return this.httpClient.post<any>(this.url+"/postScreenForm",body)
+        .pipe(catchError(this.handleError));
+  }
+
+  getScreenForms()
+  {
+    return this.httpClient.get<any>(this.url+"/getScreenForms")
+        .pipe(catchError(this.handleError));
+  }
+
+  postScreenFormMod(ScreenID,FormIDAdded, FormIDDeleted,ScreenIDOriginal)
+  {
+    const body = {"ScreenID":ScreenID,"FormIDAdded":FormIDAdded,
+      "FormIDDeleted":FormIDDeleted,"ScreenIDOriginal":ScreenIDOriginal };
+    return this.httpClient.post<any>(this.url+"/postScreenFormMod",body)
+        .pipe(catchError(this.handleError));
+  }
+
+  postForm(FormID,FormName,AdminID,Display,Modified)
+  {
+    const body = {"FormID":FormID,"FormName":FormName, "AdminID":AdminID,
+      "Display":Display,"Modified":Modified};
+    return this.httpClient.post<any>(this.url+"/postForm",body)
+        .pipe(catchError(this.handleError));
+  }
+
+  postFormField(FormField, FormID, FieldJSON)
+  {
+    const body = {"FormField":FormField,"FormID":FormID,"FieldJSON":FieldJSON};
+    return this.httpClient.post<any>(this.url+"/postFormField",body)
+        .pipe(catchError(this.handleError));
+  }
+
+
+  postFormFieldMod(FormID, FormFieldIDAdded, FormFieldIDDeleted, FormIDOriginal)
+  {
+    const body = {"FormID":FormID,"FormFieldIDAdded":FormFieldIDAdded,
+      "FormFieldIDDeleted":FormFieldIDDeleted, "FormIDOriginal":FormIDOriginal};
+    return this.httpClient.post<any>(this.url+"/postFormFieldMod",body)
+        .pipe(catchError(this.handleError));
+  }
+
+
+
+
+
+  //---------------------------- Handle errors for API calls -----------------
   handleError(error) {
     let errorMessage = '';
     if(error.error instanceof ErrorEvent) {
