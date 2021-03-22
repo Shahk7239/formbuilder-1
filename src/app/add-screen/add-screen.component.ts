@@ -18,11 +18,18 @@ export class AddScreenComponent implements OnInit {
     'screenname': '',
     'screenid': '',
     'adminid': '',
-    'orgname': '',
-    'orgid': ''
+    'existForm':false,
+    'formName':'',
+    'formNames':[],
+    'forms':[]
   };
 
+  prevScreenID = ""
   ngOnInit(): void {
+    if(JSON.stringify(this.fetchService.screenData) !== '{}')
+    {
+      this.model = this.fetchService.screenData;
+    }
   }
 
   @ViewChild(SignaturePad) signaturePad: SignaturePad;
@@ -32,11 +39,34 @@ export class AddScreenComponent implements OnInit {
     console.log(this.signaturePad.toDataURL('img/png'));
   }
 
-  async saveScreen(screenForm:NgForm) {
-    //save form data in service and call post API
-      
-    this.fetchService.screenData = screenForm.value;
+  FormTemplates():void
+  {
+    if(this.prevScreenID !== this.model.screenid && this.model.screenid !== '')
+    {
+      this.model.formNames = [];
+      this.fetchService.getScreenForms(this.model.screenid)
+      .subscribe((res) => {
+        res.map((data) => {
+          this.model.formNames.push(data.FormName)
+          this.model.forms.push(data)
+        })
 
+      });
+    }
+    if(this.model.screenid === '')
+    {
+      this.model.formNames = [];
+      this.model.forms = [];
+    }
+      
+    this.prevScreenID = this.model.screenid;
+  }
+
+  
+  async nextPage(screenForm:NgForm) {
+
+    this.fetchService.screenData = this.model;
+    
     this.router.navigateByUrl('/createform');
   }
 

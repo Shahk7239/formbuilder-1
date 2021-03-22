@@ -304,6 +304,31 @@ export class DropAreaComponent implements OnInit {
 
   ngOnInit() {
     console.log('in ngOnINit')
+    if(this.fetchService.screenData["existForm"] === true)
+    {
+      var fieldsArr = []
+      
+      //For each form, get all fields
+      for(var i=0;i<this.fetchService.screenData["forms"].length;i++)
+      {
+        if(this.fetchService.screenData["formName"] === this.fetchService.screenData["forms"][i].FormName)
+        {
+          this.model.name = this.fetchService.screenData["forms"][i].FormName;
+          this.model.description = this.fetchService.screenData["forms"][i].FormDesc;
+          this.fetchService.getFormFields(this.fetchService.screenData["forms"][i].ScreenFormID)
+          .subscribe((fields) => {
+
+            for(var i=0;i<fields.length;i++)
+            {
+              fieldsArr.push(JSON.parse(fields[i].FieldJSON));
+            }
+            this.model.attributes = fieldsArr;
+          });
+        }
+
+      }
+      this.fetchService.model = this.model;
+    }
   }
 
 
@@ -381,11 +406,10 @@ export class DropAreaComponent implements OnInit {
     
     var date = new Date();
     var formid =
-      ("00" + (date.getMonth() + 1)).slice(-2) + "-" +
-      ("00" + date.getDate()).slice(-2) + "-" +
-      date.getFullYear() + " " +
-      ("00" + date.getHours()).slice(-2) + ":" +
-      ("00" + date.getMinutes()).slice(-2) + ":" +
+      ("00" + (date.getMonth() + 1)).slice(-2) + "" +
+      ("00" + date.getDate()).slice(-2) + "" + date.getFullYear() + " " +
+      ("00" + date.getHours()).slice(-2) + "" +
+      ("00" + date.getMinutes()).slice(-2) + "" +
       ("00" + date.getSeconds()).slice(-2);
 
       console.log(formid);
@@ -399,15 +423,35 @@ export class DropAreaComponent implements OnInit {
 
             this.fetchService.postForm(formid,this.model.name,this.fetchService.screenData["adminid"],"Yes","No")
             .subscribe((data:{}) =>{
-            console.log(data);
-            for(var i=0;i<this.model.attributes.length;i++)
-            {
-              this.fetchService.postFormField(this.model.attributes[i].label,formid,JSON.stringify(this.model.attributes[i]))
-              .subscribe((data:{}) =>{
               console.log(data);
-              });
-            }
+              for(var i=0;i<this.model.attributes.length;i++)
+              {
+                this.fetchService.postFormField(this.model.attributes[i].label,formid,JSON.stringify(this.model.attributes[i]),i)
+                .subscribe((data:{}) =>{
+                console.log(data);
+                });
+              }
             
+              var attr = this.model.attributes;
+              var labels = []
+              for(var i=0;i<attr.length;i++)
+              {
+                if(this.model.attributes[i].label != "Submit")
+                  labels.push(this.model.attributes[i].label.replace(/\s+/g, '_'));
+              }
+              var dynamictable = "D_"+this.model.name.replace(/\s+/g, '_');
+              
+              this.fetchService.postFormDSD(formid,dynamictable)
+              .subscribe((data:{}) =>{
+                console.log(data);
+              });
+
+              this.fetchService.createDynamicTable(dynamictable,labels)
+              .subscribe((data:{}) =>{
+                console.log(data);
+              });
+
+
             this.fetchService.model = this.model;
             alert("Saved in DB"); 
             });

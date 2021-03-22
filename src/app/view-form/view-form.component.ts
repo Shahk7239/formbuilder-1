@@ -213,13 +213,31 @@ export class ViewFormComponent implements OnInit {
     this.getAvailableForms();
   }
 
+  forms = [];
   getAvailableForms(){
     
-    this.fetchService.getScreenForms().subscribe((res)=>{
-      console.log(res[0].ScreenFormID);
-
+    var fieldsArr = []
+    this.fetchService.getScreenForms(this.fetchService.screenData["screenid"])
+    .subscribe((res)=>{
       
-    });
+      //For each form, get all fields
+      for(var i=0;i<res.length;i++)
+      {
+        this.forms.push(res[i].ScreenFormID);
+        this.model.name = res[0].FormName;
+        this.model.description = res[0].FormDesc;
+        this.fetchService.getFormFields(res[0].ScreenFormID)
+        .subscribe((fields) => {
+
+          for(var i=0;i<fields.length;i++)
+          {
+            fieldsArr.push(JSON.parse(fields[i].FieldJSON));
+          }
+          this.model.attributes = fieldsArr;
+        });
+      }
+
+      });
     
   } 
 
@@ -266,6 +284,45 @@ export class ViewFormComponent implements OnInit {
     if(!valid){
       return false;
     }   
+
+    var attr = this.model.attributes;
+        var labels = []
+        var values = []
+
+        for(var i=0;i<attr.length;i++)
+        {
+            if(attr[i].label != "Submit" && attr[i].value !== undefined && attr[i].value != ""){
+              labels.push(attr[i].label.replace(/\s+/g, '_'));
+              values.push(attr[i].value);
+            }
+            if(attr[i].type === "checkbox")
+            {
+              labels.push(attr[i].label.replace(/\s+/g, '_'));
+              var checkBox = attr[i].values;
+              var val = ""
+              checkBox.map((obj)=> {
+                if(obj.selected === true)
+                {
+                  val = val + obj.value + ", ";
+                }
+              })
+              val = val.slice(0,-2);
+              values.push(val);
+              //console.log(val);
+            }
+        }
+        //console.log(this.forms)
+
+        this.fetchService.getFormDSD(this.forms[0])
+        .subscribe((ress)=>{
+
+          this.fetchService.postDynamicTable(ress[0].DSDName,labels,values)
+          .subscribe((res) => {
+            console.log(res);
+
+          });
+
+        });
 
     // //Saving to DB
     // var attr = this.model.attributes;

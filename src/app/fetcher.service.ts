@@ -15,6 +15,9 @@ export class FetcherService {
   public screenData = {}
   public dropArr = [1]
   public model = {}
+  public existingForms = false;
+  public formNameFromAddScreen = "";
+  public formsFromAddScreen = []
 
   constructor(private httpClient: HttpClient) { }
 
@@ -134,9 +137,10 @@ export class FetcherService {
         .pipe(catchError(this.handleError));
   }
 
-  getScreenForms()
+  getScreenForms(ScreenID)
   {
-    return this.httpClient.get<any>(this.url+"/getScreenForms")
+    const body = {"ScreenID":ScreenID};
+    return this.httpClient.post<any>(this.url+"/getScreenForms",body)
         .pipe(catchError(this.handleError));
   }
 
@@ -156,13 +160,19 @@ export class FetcherService {
         .pipe(catchError(this.handleError));
   }
 
-  postFormField(FormField, FormID, FieldJSON)
+  postFormField(FormField, FormID, FieldJSON,Row)
   {
-    const body = {"FormField":FormField,"FormID":FormID,"FieldJSON":FieldJSON};
+    const body = {"FormField":FormField,"FormID":FormID,"FieldJSON":FieldJSON,"Row":Row};
     return this.httpClient.post<any>(this.url+"/postFormField",body)
         .pipe(catchError(this.handleError));
   }
 
+  getFormFields(FormID)
+  {
+    const body = {"FormID":FormID};
+    return this.httpClient.post<any>(this.url+"/getFormFields",body)
+        .pipe(catchError(this.handleError));
+  }
 
   postFormFieldMod(FormID, FormFieldIDAdded, FormFieldIDDeleted, FormIDOriginal)
   {
@@ -172,8 +182,33 @@ export class FetcherService {
         .pipe(catchError(this.handleError));
   }
 
+  postFormDSD(FormID, DSDName)
+  {
+    const body = {"FormID":FormID,"DSDName":DSDName};
+    return this.httpClient.post<any>(this.url+"/postFormDSD",body)
+        .pipe(catchError(this.handleError));
+  }
 
+  getFormDSD(FormID)
+  {
+    const body = {"FormID":FormID};
+    return this.httpClient.post<any>(this.url+"/getFormDSD",body)
+        .pipe(catchError(this.handleError));
+  }
 
+  createDynamicTable(TableName,Labels)
+  {
+    const body = {"TableName":TableName,"Labels":Labels};
+    return this.httpClient.post<any>(this.url+"/createDynamicTable",body)
+      .pipe(catchError(this.handleError));
+  }
+
+  postDynamicTable(TableName,Labels,Values)
+  {
+    const body = {"TableName":TableName,"Labels":Labels,"Values" :Values};
+    return this.httpClient.post<any>(this.url+"/postDynamicTable",body)
+      .pipe(catchError(this.handleError));
+  }
 
 
   //---------------------------- Handle errors for API calls -----------------
