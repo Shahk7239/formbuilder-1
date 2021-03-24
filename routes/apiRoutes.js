@@ -173,14 +173,24 @@ route.post("/postForm", async (req, res) => {
   res.json({ Message: 'Inserted in Form table' });
 });
 
-// route.post("/getForms", async (req,res) => {
-//   console.log(req.body);
-//   const {formID} = req.body;
-//   const conn = await connection().catch(e => {});
-//   const results = await query(conn,"Select FormID from "+dbName+".form ").
-//   catch((err) => { res.status(400).json(err);})
-//   res.status(200).send(results);
-// });
+//Modify to put yes
+route.post("/modifyForm", async (req, res) => {
+  const {FormID,Modified} = req.body;
+  const conn = await connection().catch(e => { });
+  const result = await query(conn, "UPDATE "+dbName+".`Form` SET Modified = \""+Modified+"\" Where FormID = \""+FormID+"\"")
+  .catch((err) => { res.status(400).send(err); })
+  res.json({ Message: 'Modified in Form table' });
+});
+
+//All forms which are not modified from the given screen
+route.post("/getForm", async (req,res) => {
+  //console.log(req.body);
+  const {ScreenID} = req.body;
+  const conn = await connection().catch(e => {});
+  const results = await query(conn,"SELECT * from "+dbName+".screenform s join "+dbName+".form f on s.ScreenFormID = f.FormID where ScreenID = \""+ScreenID+"\" and Modified = \"No\"").
+  catch((err) => { res.status(400).json(err);})
+  res.status(200).send(results);
+});
 
 
 
@@ -296,12 +306,44 @@ route.post("/postDynamicTable", async (req, res) => {
   const conn = await connection().catch(e => { });
   const result = await query(conn, qu)
   .catch((err) => { res.status(400).send(err); })
-  res.status(200).json({ Message: 'Posted Form Data' });
+  res.status(200).json({ Message: 'Inserted DynamicTable Data' });
+});
+
+route.post("/alterDynamicTable", async (req, res) => {
+  const {TableName,Labels} = req.body;
+  const conn = await connection().catch(e => { });
+  const result = await query(conn, "Show columns from "+dbName+"."+TableName)
+  .catch((err) => { res.status(400).json(err); })
+  var existingCols = []
+  result.map((obj)=>{existingCols.push(obj["Field"])})
+  
+  var qu = "Alter Table "+dbName+".`"+TableName+"` ";
+  for(var i=0;i<Labels.length;i++)
+  {
+    if(!existingCols.includes(Labels[i]))
+    {
+      qu = qu + "Add "+Labels[i]+" varchar(50) DEFAULT NULL,";
+    }
+  }
+  qu = qu.slice(0,-1);
+  qu = qu + ";";
+
+  console.log(qu);
+  const ans = await query(conn, qu)
+  .catch((err) => { res.status(400).json(err); })
+  res.json({Message:"Altered Dynamic Table"});
 });
 
 
-
-
+route.post("/hai",async(req,res) =>{
+  const {TableName} = req.body;
+  const conn = await connection().catch(e => { });
+  const result = await query(conn, "Show columns from "+dbName+"."+TableName)
+  .catch((err) => { res.status(400).json(err); })
+  var existingCols = []
+  //result.map((obj)=>{existingCols.push(obj["Field"])})
+  res.send(result);
+})
 // ------------   OLD APIs (Use them as needed)  ----------------------------------------------
 
 // //Dynamic Table Creation

@@ -160,6 +160,20 @@ export class FetcherService {
         .pipe(catchError(this.handleError));
   }
 
+  modifyForm(FormID,Modified)
+  {
+    const body = {"FormID":FormID,"Modified":Modified};
+    return this.httpClient.post<any>(this.url+"/modifyForm",body)
+        .pipe(catchError(this.handleError));
+  }
+
+  getForm(ScreenID)
+  {
+    const body = {"ScreenID":ScreenID};
+    return this.httpClient.post<any>(this.url+"/getForm",body)
+        .pipe(catchError(this.handleError));
+  }
+
   postFormField(FormField, FormID, FieldJSON,Row)
   {
     const body = {"FormField":FormField,"FormID":FormID,"FieldJSON":FieldJSON,"Row":Row};
@@ -207,6 +221,13 @@ export class FetcherService {
   {
     const body = {"TableName":TableName,"Labels":Labels,"Values" :Values};
     return this.httpClient.post<any>(this.url+"/postDynamicTable",body)
+      .pipe(catchError(this.handleError));
+  }
+
+  alterDynamicTable(TableName,Labels)
+  {
+    const body = {"TableName":TableName,"Labels":Labels};
+    return this.httpClient.post<any>(this.url+"/alterDynamicTable",body)
       .pipe(catchError(this.handleError));
   }
 

@@ -217,13 +217,13 @@ export class ViewFormComponent implements OnInit {
   getAvailableForms(){
     
     var fieldsArr = []
-    this.fetchService.getScreenForms(this.fetchService.screenData["screenid"])
+    this.fetchService.getForm(this.fetchService.screenData["screenid"])
     .subscribe((res)=>{
       
       //For each form, get all fields
-      for(var i=0;i<res.length;i++)
+      for(var i=0;i<1;i++)
       {
-        this.forms.push(res[i].ScreenFormID);
+        this.forms.push(res[0].ScreenFormID);
         this.model.name = res[0].FormName;
         this.model.description = res[0].FormDesc;
         this.fetchService.getFormFields(res[0].ScreenFormID)

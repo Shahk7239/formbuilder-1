@@ -19,6 +19,7 @@ export class AddScreenComponent implements OnInit {
     'screenid': '',
     'adminid': '',
     'existForm':false,
+    'existTable':false,
     'formName':'',
     'formNames':[],
     'forms':[]
@@ -44,7 +45,7 @@ export class AddScreenComponent implements OnInit {
     if(this.prevScreenID !== this.model.screenid && this.model.screenid !== '')
     {
       this.model.formNames = [];
-      this.fetchService.getScreenForms(this.model.screenid)
+      this.fetchService.getForm(this.model.screenid)
       .subscribe((res) => {
         res.map((data) => {
           this.model.formNames.push(data.FormName)

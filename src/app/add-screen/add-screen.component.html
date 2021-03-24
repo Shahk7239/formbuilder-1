@@ -32,6 +32,13 @@
           </select>
           <label *ngIf="model.formNames.length == 0" class="text-danger">Screen ID Required</label>
     </div>
+    <div *ngIf="model.existForm" class="custom-control custom-checkbox" 
+    style="margin-top: 12px;text-align:center; vertical-align:middle">
+        <input type="checkbox" id="existTable" name="existTable" class="custom-control-input"
+        [(ngModel)]="model.existTable" >
+        <label for="existTable" style="display: inline-block;margin-left: 15px;" class="custom-control-label">
+            Check this to use the Existing Dynamic Table to Store Form Data</label>
+    </div>
     <div style="text-align: center;" class="mt-4">
         <button type="reset" class="btn btn-secondary">Clear</button>
         <button type="submit" class="btn btn-primary ml-4" [disabled]="!ScreenForm.form.valid">Next</button>
