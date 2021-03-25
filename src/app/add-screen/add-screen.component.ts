@@ -47,9 +47,10 @@ export class AddScreenComponent implements OnInit {
       this.model.formNames = [];
       this.fetchService.getForm(this.model.screenid)
       .subscribe((res) => {
+        
         res.map((data) => {
-          this.model.formNames.push(data.FormName)
-          this.model.forms.push(data)
+          this.model.formNames.push(data.FormName);
+          this.model.forms.push(data);
         })
 
       });

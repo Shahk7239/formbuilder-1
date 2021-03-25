@@ -286,17 +286,17 @@ export class ViewFormComponent implements OnInit {
     }   
 
     var attr = this.model.attributes;
-        var labels = []
-        var values = []
+    var labels = []
+    var values = []
 
-        for(var i=0;i<attr.length;i++)
-        {
-            if(attr[i].label != "Submit" && attr[i].value !== undefined && attr[i].value != ""){
+      for(var i=0;i<attr.length;i++)
+      {
+          if(attr[i].label != "Submit" && attr[i].value !== undefined && attr[i].value != ""){
               labels.push(attr[i].label.replace(/\s+/g, '_'));
               values.push(attr[i].value);
-            }
-            if(attr[i].type === "checkbox")
-            {
+          }
+          if(attr[i].type === "checkbox")
+          {
               labels.push(attr[i].label.replace(/\s+/g, '_'));
               var checkBox = attr[i].values;
               var val = ""
@@ -308,21 +308,22 @@ export class ViewFormComponent implements OnInit {
               })
               val = val.slice(0,-2);
               values.push(val);
-              //console.log(val);
-            }
-        }
-        //console.log(this.forms)
+          }
+      }
 
+      if(values.length > 0)
+      {
         this.fetchService.getFormDSD(this.forms[0])
         .subscribe((ress)=>{
 
-          this.fetchService.postDynamicTable(ress[0].DSDName,labels,values)
-          .subscribe((res) => {
-            console.log(res);
+            this.fetchService.postDynamicTable(ress[0].DSDName,labels,values)
+            .subscribe((res) => {
+              console.log(res);
+
+            });
 
           });
-
-        });
+      }
 
     // //Saving to DB
     // var attr = this.model.attributes;
@@ -368,13 +369,6 @@ export class ViewFormComponent implements OnInit {
     input.append('formId',this.model._id);
     input.append('attributes',JSON.stringify(this.model.attributes))
 
-    // this.us.postDataApi('/user/formFill',input).subscribe(r=>{
-    //   console.log(r);
-    //   swal('Success','You have contact sucessfully','success');
-    //   this.success = true;
-    // },error=>{
-    //   swal('Error',error.message,'error');
-    // });
   }
 
   clearInputs(){

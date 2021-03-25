@@ -321,18 +321,60 @@ export class DropAreaComponent implements OnInit {
     item.selected = !item.selected;
   }
 
-  deleteAttributes() {
+  deleteOption() {
     swal({
       title: "Delete Template?",
-      text: "Do you want to remove all fields?",
-      type: "warning",
+      text: "Do you want to Delete this Template?",
+      type: "question",
       showCancelButton: true,
       confirmButtonColor: "#00B96F",
       cancelButtonColor: "#d33",
       confirmButtonText: "Yes!",
     }).then((result) => {
       if (result.value) {
-        this.model.attributes = [];
+
+        swal({
+          title: "There is some data that has been previously acquired by this "+this.fetchService.screenData["formName"],
+          text: " Please select an option",
+          type: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#00B96F",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Keep Data and Delete this form",
+          cancelButtonText:"Delete both Data and Form",
+        }).then((res) => {
+          if(res.value)
+          {
+            //API call to drop table
+            for (var i = 0;i < this.fetchService.screenData["forms"].length;i++)
+              {
+                if (this.fetchService.screenData["formName"] === 
+                this.fetchService.screenData["forms"][i].FormName) 
+                {
+                  // this.fetchService.deleteFormID(this.fetchService.screenData["forms"][i].ScreenFormID)
+                  // .subscribe((res) => {
+                  //   console.log(res);
+
+                  // });
+
+                  this.fetchService.getFormDSD(this.fetchService.screenData["forms"][i].ScreenFormID)
+                    .subscribe((ress) => {
+
+                      this.fetchService.DropTable(ress[0].DSDName)
+                        .subscribe((res) => {
+                          console.log(res);
+                        });
+
+                    });
+                    break;
+                }
+              }
+              swal('Deleted!','Your Template has been deleted Completely.','success');
+          }
+          this.model.name = "App name...";
+          this.model.description = "App Description...";
+          this.model.attributes = [];
+        });
       }
     });
   }

@@ -193,7 +193,6 @@ route.post("/getForm", async (req,res) => {
 });
 
 
-
 route.post("/createFormField", async (req, res) => {
   const conn = await connection().catch(e => { });
   const result = await query(conn, "CREATE TABLE IF NOT EXISTS "+dbName+".`FormField` (`FieldID` varchar(30) NOT NULL,`FormID` varchar(30) NOT NULL,`FieldJSON` json NOT NULL)")
@@ -259,7 +258,15 @@ route.post("/getFormDSD", async (req,res) => {
 });
 
 
-
+route.post("/deleteFormID", async (req,res) => {
+  const {FormID} = req.body;
+  const conn = await connection().catch(e => {});
+  const qu = "Delete from "+dbName+".Form where FormID like \""+FormID+"\"; Delete from "+dbName+".FormField where FormID like \""+FormID+"\"; Delete from "+dbName+".ScreenForm where ScreenFormID like \""+FormID+"\"; Delete from "+dbName+".Form_DSD where FormID like \""+FormID+"\";";
+  //console.log(qu);
+  const results = await query(conn,qu).
+  catch((err) => { res.status(400).json(err);})
+  res.json({Message:'Deleted all Form details'});
+});
 
 
 //----------------- Dynamic Table Creation
@@ -335,15 +342,6 @@ route.post("/alterDynamicTable", async (req, res) => {
 });
 
 
-route.post("/hai",async(req,res) =>{
-  const {TableName} = req.body;
-  const conn = await connection().catch(e => { });
-  const result = await query(conn, "Show columns from "+dbName+"."+TableName)
-  .catch((err) => { res.status(400).json(err); })
-  var existingCols = []
-  //result.map((obj)=>{existingCols.push(obj["Field"])})
-  res.send(result);
-})
 // ------------   OLD APIs (Use them as needed)  ----------------------------------------------
 
 // //Dynamic Table Creation
@@ -439,9 +437,9 @@ route.post("/hai",async(req,res) =>{
 
 route.post("/DropTable", async (req,res) =>{
   //console.log(req.body)
-  const { name } = req.body;
+  const { TableName } = req.body;
   const conn = await connection().catch(e => {});
-  const result = await query(conn, "DROP Table "+dbName+"."+name).
+  const result = await query(conn, "DROP Table "+dbName+"."+TableName).
   catch((err) => {res.status(400).send(err);})
   res.status(200).json({ Message: 'Dropped Table' });
 });

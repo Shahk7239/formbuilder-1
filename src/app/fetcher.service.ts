@@ -232,6 +232,20 @@ export class FetcherService {
   }
 
 
+  // deleteFormID(FormID)
+  // {
+  //   const body = {"FormID":FormID};
+  //   return this.httpClient.post<any>(this.url+"/deleteFormID",body)
+  //       .pipe(catchError(this.handleError)); 
+  // }
+
+  DropTable(TableName)
+  {
+    const body = {"TableName":TableName};
+    return this.httpClient.post<any>(this.url+"/DropTable",body)
+      .pipe(catchError(this.handleError));
+  }
+
   //---------------------------- Handle errors for API calls -----------------
   handleError(error) {
     let errorMessage = '';
