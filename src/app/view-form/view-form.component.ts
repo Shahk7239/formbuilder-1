@@ -291,7 +291,7 @@ export class ViewFormComponent implements OnInit {
 
       for(var i=0;i<attr.length;i++)
       {
-          if(attr[i].label != "Submit" && attr[i].value !== undefined && attr[i].value != ""){
+          if(attr[i].type != "button" && attr[i].value !== undefined && attr[i].value != ""){
               labels.push(attr[i].label.replace(/\s+/g, '_'));
               values.push(attr[i].value);
           }
@@ -324,44 +324,7 @@ export class ViewFormComponent implements OnInit {
 
           });
       }
-
-    // //Saving to DB
-    // var attr = this.model.attributes;
-    // var labels = []
-    // var values = []
-
-    // for(var i=0;i<attr.length;i++)
-    // {
-    //     if(attr[i].label != "Submit" && attr[i].value !== undefined && attr[i].value != ""){
-    //       labels.push(attr[i].label.replace(/\s+/g, '_'));
-    //       values.push(attr[i].value);
-    //     }
-    //     if(attr[i].type === "checkbox")
-    //     {
-    //       labels.push(attr[i].label.replace(/\s+/g, '_'));
-    //       var checkBox = attr[i].values;
-    //       var val = ""
-    //       checkBox.map((obj)=> {
-    //         if(obj.selected === true)
-    //         {
-    //           val = val + obj.value + ", ";
-    //         }
-    //       })
-    //       val = val.slice(0,-2);
-    //       values.push(val);
-    //       //console.log(val);
-    //     }
-    // }
-    // if(labels.length > 0){
-    //   //console.log(labels)
-    //   //console.log(values)
-    //   var body = {"dbName":this.fetchService.screenData["orgname"],"formID":"ID","labels":labels,"values" :values};
-    //   (this.fetchService.postForm(body))
-    //   .subscribe((data:{}) =>{
-    //     console.log(data);
-    //   });
-    // }
-
+      
     
     alert("Saved")
     this.clearInputs();
@@ -375,7 +338,7 @@ export class ViewFormComponent implements OnInit {
     var attr = this.model.attributes;
     for(var i=0;i<attr.length;i++)
     {
-        if(attr[i].label != "Submit"){
+        if(!attr[i].name.includes("button")){
           attr[i].value = "";
         }
     }

@@ -68,7 +68,7 @@ export class AddScreenComponent implements OnInit {
   async nextPage(screenForm:NgForm) {
 
     this.fetchService.screenData = this.model;
-    
+    //console.log(this.fetchService.screenData);
     this.router.navigateByUrl('/createform');
   }
 

@@ -26,11 +26,11 @@
             Check this to use/modify Existing Forms</label>
     </div>
     <div *ngIf="model.existForm" style="margin-top: 12px;">
-        <select class="form-control" id="formName" name="formName" [(ngModel)]="model.formName">
+        <select class="form-control" id="formName" name="formName" [(ngModel)]="model.formName" required>
             <option value="" selected>Select a Form to Modify</option>
             <option *ngFor="let f of model.formNames" [value]="f">{{f}}</option>
           </select>
-          <label *ngIf="model.formNames.length == 0" class="text-danger">Screen ID Required</label>
+          <label *ngIf="model.screenid === ''" class="text-danger">Screen ID Required</label>
     </div>
     <div *ngIf="model.existForm" class="custom-control custom-checkbox" 
     style="margin-top: 12px;text-align:center; vertical-align:middle">

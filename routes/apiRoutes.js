@@ -108,7 +108,7 @@ route.post("/createScreen", async (req,res) =>{
 });
   
 route.post("/postScreen", async (req, res) => {
-    //console.log(req.body)
+    console.log(req.body)
     const {ScreenID,ScreenName,CreatedBy, Display,Modified} = req.body;
     const conn = await connection().catch(e => { });
     const result = await query(conn, "INSERT INTO "+dbName+".`screen` VALUES (?,?,now(),?,?,?)",
@@ -184,7 +184,6 @@ route.post("/modifyForm", async (req, res) => {
 
 //All forms which are not modified from the given screen
 route.post("/getForm", async (req,res) => {
-  //console.log(req.body);
   const {ScreenID} = req.body;
   const conn = await connection().catch(e => {});
   const results = await query(conn,"SELECT * from "+dbName+".screenform s join "+dbName+".form f on s.ScreenFormID = f.FormID where ScreenID = \""+ScreenID+"\" and Modified = \"No\"").
@@ -195,26 +194,35 @@ route.post("/getForm", async (req,res) => {
 
 route.post("/createFormField", async (req, res) => {
   const conn = await connection().catch(e => { });
-  const result = await query(conn, "CREATE TABLE IF NOT EXISTS "+dbName+".`FormField` (`FieldID` varchar(30) NOT NULL,`FormID` varchar(30) NOT NULL,`FieldJSON` json NOT NULL)")
+  const result = await query(conn, "CREATE TABLE IF NOT EXISTS "+dbName+".`FormField` (`FieldID` varchar(30) NOT NULL,`Label` varchar(30) NOT NULL, `FormID` varchar(30) NOT NULL,`FieldJSON` json NOT NULL, PRIMARY KEY (`FieldID`))")
   .catch((err) => { res.status(400).send(err); })
   res.json({ Message: 'Created FormField table' });
 });
 
 route.post("/postFormField", async (req, res) => {
-  const {FormField,FormID, FieldJSON,Row} = req.body;
+  const {FieldID, Label,FormID, FieldJSON,Row} = req.body;
   const conn = await connection().catch(e => { });
-  const result = await query(conn, "INSERT INTO "+dbName+".`FormField` VALUES(?,?,?,"+Row+")",[FormField,FormID,FieldJSON])
+  const result = await query(conn, "INSERT INTO "+dbName+".`FormField` VALUES(?,?,?,?,"+Row+")",[FieldID,Label,FormID,FieldJSON])
   .catch((err) => { res.status(400).send(err); })
   res.json({ Message: 'Inserted in FormField table' });
 });
 
 route.post("/getFormFields", async (req,res) => {
-  //console.log(req.body);
   const {FormID} = req.body;
   const conn = await connection().catch(e => {});
-  const results = await query(conn,"Select FieldJSON from "+dbName+".FormField where FormID like \""+FormID+"\" ORDER BY Row").
+  const results = await query(conn,"Select * from "+dbName+".FormField where FormID like \""+FormID+"\" ORDER BY Row").
   catch((err) => { res.status(400).json(err);})
   res.status(200).send(results);
+});
+
+route.post("/updateFormField", async (req,res) => {
+  const {FormID,FieldID,FieldJSON} = req.body;
+  const conn = await connection().catch(e => {});
+  const qu = "Update "+dbName+".FormField set FieldJSON = '" + FieldJSON + "' where FormID like \""+FormID+"\" and FieldID = \""+FieldID+"\"";
+  //console.log(qu);
+  const results = await query(conn,qu).
+  catch((err) => { res.status(400).json(err);})
+  res.status(200).send({Message:"Updated FormField"});
 });
 
 

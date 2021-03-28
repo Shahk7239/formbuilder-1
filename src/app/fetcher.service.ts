@@ -174,9 +174,9 @@ export class FetcherService {
         .pipe(catchError(this.handleError));
   }
 
-  postFormField(FormField, FormID, FieldJSON,Row)
+  postFormField(FieldID, Label,FormID, FieldJSON,Row)
   {
-    const body = {"FormField":FormField,"FormID":FormID,"FieldJSON":FieldJSON,"Row":Row};
+    const body = {"FieldID":FieldID, "Label":Label,"FormID":FormID,"FieldJSON":FieldJSON,"Row":Row};
     return this.httpClient.post<any>(this.url+"/postFormField",body)
         .pipe(catchError(this.handleError));
   }
@@ -185,6 +185,15 @@ export class FetcherService {
   {
     const body = {"FormID":FormID};
     return this.httpClient.post<any>(this.url+"/getFormFields",body)
+        .pipe(catchError(this.handleError));
+  }
+
+  
+  updateFormField(FormID,FieldID,FieldJSON)
+  {
+    const body = {"FieldID":FieldID,"FormID":FormID,"FieldJSON":FieldJSON};
+    //console.log(body);
+    return this.httpClient.post<any>(this.url+"/updateFormField",body)
         .pipe(catchError(this.handleError));
   }
 
@@ -230,6 +239,7 @@ export class FetcherService {
     return this.httpClient.post<any>(this.url+"/alterDynamicTable",body)
       .pipe(catchError(this.handleError));
   }
+
 
 
   // deleteFormID(FormID)
