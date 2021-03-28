@@ -14,6 +14,7 @@ import { ViewFormComponent } from './view-form/view-form.component';
 import { AddScreenComponent } from './add-screen/add-screen.component';
 import { NotfoundComponent } from './notfound/notfound.component';
 import {SignaturePadModule} from 'ngx-signaturepad';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 const appRoutes: Routes = [
   { path: '', component: EditAppComponent },
@@ -37,7 +38,8 @@ const appRoutes: Routes = [
     AppRoutingModule,
     DndModule,
     HttpClientModule,
-    SignaturePadModule
+    SignaturePadModule,
+    NgbModule
   ],
   providers: [FetcherService],
   bootstrap: [AppComponent]

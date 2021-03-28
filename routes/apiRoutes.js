@@ -116,6 +116,13 @@ route.post("/postScreen", async (req, res) => {
     res.json({ Message: 'Inserted in Screen Table' });
 });
 
+route.get("/getScreens", async (req,res) => {	
+  const conn = await connection().catch(e => {});	
+  const results = await query(conn,"SELECT * FROM "+dbName+".screen where Display = 'Yes' Order by Date").	
+  catch((err) => { res.status(400).json(err);})	
+  res.status(200).send(results);	
+});
+
 route.post("/createScreenForm", async (req, res) => {
     const conn = await connection().catch(e => { });
     const result = await query(conn, "CREATE TABLE IF NOT EXISTS "+dbName+".`ScreenForm` (`ScreenFormID` varchar(30) NOT NULL,`ScreenID` varchar(30) NOT NULL,`FormName` varchar(30) NOT NULL,`FormDesc` varchar(30) NOT NULL)")

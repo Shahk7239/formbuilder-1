@@ -12,7 +12,7 @@
   </div>
   <div class="spacer30"></div>
   <div class="row" >
-    <div class="col-4" style="overflow:hidden;float: left;" >
+    <div class="col-3" style="overflow:hidden;float: left;" >
 
         <!-- <div class="row">
         <label class="col-8">Background Color</label>
@@ -37,21 +37,50 @@
     </div>
 
     <!--style="overflow-x:hidden;overflow-y:scroll;float:right;height: 700px;"-->
-    <div class="col-8">
+    <div class="col-6">
 
       <!--a dropzone-->
       <!--to allow dropping content that is not [dndDraggable] set dndAllowExternal to true-->
       <div *ngFor="let drop of dropArr.slice().reverse()" style="margin-top:70px;">
         <h2>Template {{drop}}</h2>
         <hr>
-        <app-drop-area [indexval]="drop" ></app-drop-area>
+        <app-drop-area [indexval]="drop"  [editForm]="editForm" ></app-drop-area>
       </div>
 
+    </div>
+      <div class="col-3">	
+        <h4>List of Components</h4>	
+        <hr>	
+        <button type="button" class="btn btn-outline-primary" (click)="openPopup(content)"><i class="fa fa-plus"></i>&nbsp;Add Screen</button>	
+        <hr>	
+        <div *ngFor="let screen of getScreens">	
+          <h5 style="display: inline;">{{screen.ScreenName}}</h5>	
+          &nbsp;	
+          <button type="button" class="btn btn-secondary" (click)="addScreenForm(screen)"><i class="fa fa-plus"></i>&nbsp;Add Form</button>	
+          <ul *ngFor="let form of getForms">	
+            <li *ngIf="form.ScreenID==screen.ScreenID" style="line-height: 2;">	
+              <a href="javascript:void(0)" (click)="formDisplay(form, screen)">{{form.FormName}}</a>	
+              &nbsp;	
+              <a href="javascript: void(0);" (click)="formEdit(form, screen)"><i class="fa fa-edit"></i></a>	
+            </li>	
+          </ul>	
+          <hr>	
+        </div>	
     </div>
   </div>
 </div>
 
- 
+<ng-template #content let-c="close" let-d="dismiss">	
+  <div class="modal-header">	
+    <h4 class="modal-title" id="modal-basic-title">Screen Add</h4>	
+    <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">	
+      <span aria-hidden="true">&times;</span>	
+    </button>	
+  </div>	
+  <div class="modal-body">	
+    <app-add-screen (newItemEvent)="closePopup($event)" [popup]="popup"></app-add-screen>	
+  </div>	
+</ng-template>
 
 <div *ngIf="report" class="padding20 white-bg">
     <div class="row">

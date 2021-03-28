@@ -316,6 +316,8 @@ export class DropAreaComponent implements OnInit {
       }
       this.fetchService.model = this.model;
     }
+    if(this.fetchService.formFields.length > 0)
+      this.model.attributes = this.fetchService.formFields;
   }
 
   toggleValue(item) {

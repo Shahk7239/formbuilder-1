@@ -17,7 +17,9 @@ export class FetcherService {
   public model = {}
   public existingForms = false;
   public formNameFromAddScreen = "";
-  public formsFromAddScreen = []
+  public formsFromAddScreen = [];
+  public formData: any;
+  public formFields = [];
 
   constructor(private httpClient: HttpClient) { }
 
@@ -129,6 +131,11 @@ export class FetcherService {
         .pipe(catchError(this.handleError));
   }
 
+  getScreens()
+  {
+    return this.httpClient.get<any>(this.url+"/getScreens")
+    .pipe(catchError(this.handleError));
+  }
 
   postScreenForm(ScreenFormID,ScreenID, FormName,FormDesc)
   {
