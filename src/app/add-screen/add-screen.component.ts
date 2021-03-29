@@ -3,6 +3,7 @@ import { NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import { FetcherService } from '../fetcher.service';
 import {SignaturePad} from 'ngx-signaturepad';
+import swal from 'sweetalert2';
 
 @Component({
   selector: 'app-add-screen',
@@ -77,6 +78,7 @@ export class AddScreenComponent implements OnInit {
     } else {	
       this.router.navigateByUrl('/createform');	
     }
+    swal("Please Add a Form")
   }
 
 }

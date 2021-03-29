@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, OnInit, ViewChild, Output, EventEmitter} from '@angular/core';
 import { field, value } from '../global.model';
 import { ActivatedRoute, Router } from '@angular/router';
 import swal from 'sweetalert2';
@@ -20,6 +20,7 @@ export class EditAppComponent implements OnInit {
   };
   success = false;
   dropArr = [1];
+
   fieldModels:Array<field>=[
     {
       "type": "text",
@@ -189,6 +190,7 @@ export class EditAppComponent implements OnInit {
   editForm: any;	
   popup: boolean = false;
 
+
   constructor(
     private route:ActivatedRoute, private fetchService: FetcherService,
     private router:Router,config: NgbModalConfig, private modalService: NgbModal
@@ -303,63 +305,69 @@ export class EditAppComponent implements OnInit {
         this.fetchService.getForm(obj.ScreenID).subscribe((forms) => {	
           forms.forEach(childobj => {	
             tempArray.push(childobj);	
-          });	
+          });
+          this.getForms = tempArray;
+          	
         });	
-      });	
-      this.getForms = tempArray;	
+      });		
     });	
+    
   }	
 
   formDisplay(form, screen) {	
-    var model = {	
-      'screenname': screen.ScreenName,	
-      'screenid': screen.ScreenID,	
-      'adminid': screen.CreatedBy,	
-      'existForm': true,	
-      'existTable': true,	
-      'formName': form.formName,	
-      'formNames': [],	
-      'forms': [form]	
-    };
-    this.viewForm = true;	
-    this.fetchService.formData = form;	
-    this.fetchService.screenData = model;	
-    this.router.navigateByUrl('/viewform');	
+    this.fetchService.sendFormClickEvent(form,screen);
+    // console.log(form)
+    // var model = {	
+    //   'screenname': screen.ScreenName,	
+    //   'screenid': screen.ScreenID,	
+    //   'adminid': screen.CreatedBy,	
+    //   'existForm': true,	
+    //   'existTable': true,	
+    //   'formName': form.FormName,	
+    //   'formNames': [],	
+    //   'forms': [form]	
+    // };
+    // console.log(model)
+    // this.viewForm = true;	
+    // this.fetchService.formData = form;	
+    // this.fetchService.screenData = model;	
+
   }	
 
-  formEdit(form, screen) {	
-    var model = {	
-      'screenname': screen.ScreenName,	
-      'screenid': screen.ScreenID,	
-      'adminid': screen.CreatedBy,	
-      'existForm': true,	
-      'existTable': true,	
-      'formName': form.formName,	
-      'formNames': [],	
-      'forms': [form]	
-    };	
+  // formEdit(form, screen) {	
+  //   var model = {	
+  //     'screenname': screen.ScreenName,	
+  //     'screenid': screen.ScreenID,	
+  //     'adminid': screen.CreatedBy,	
+  //     'existForm': true,	
+  //     'existTable': true,	
+  //     'formName': form.FormName,	
+  //     'formNames': [],	
+  //     'forms': [form]	
+  //   };	
 
-    this.fetchService.screenData = model;	
-    this.fetchService.formData = form;	
-    this.fetchService.getFormFields(form.FormID).subscribe((data) => {	
-      this.formFields = data;	
-      var fields = [];	
-      this.formFields.forEach(element => {	
-        fields.push(JSON.parse(element.FieldJSON));        	
-      });	
-      this.fetchService.formFields = fields;	
-      this.editForm = form.FormID;	
-      this.router.navigateByUrl('/createform');
-    });	
-  }	
+  //   this.fetchService.screenData = model;	
+  //   this.fetchService.formData = form;	
+  //   this.fetchService.getFormFields(form.FormID).subscribe((data) => {	
+  //     this.formFields = data;	
+  //     var fields = [];	
+  //     this.formFields.forEach(element => {	
+  //       fields.push(JSON.parse(element.FieldJSON));        	
+  //     });	
+  //     this.fetchService.formFields = fields;	
+  //     this.editForm = form.FormID;	
+  //     this.router.navigateByUrl('/createform');
+  //   });	
+  // }	
 
   addScreenForm(screen) {	
+    swal("New Form in the '"+screen.ScreenID+"' screen?");
     var model = {	
       'screenname': screen.ScreenName,	
       'screenid': screen.ScreenID,	
       'adminid': screen.CreatedBy,	
-      'existForm': true,	
-      'existTable': true,	
+      'existForm': false,	
+      'existTable': false,	
       'formName': '',	
       'formNames': [],	
       'forms': []	

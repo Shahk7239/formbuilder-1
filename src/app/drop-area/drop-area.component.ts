@@ -5,6 +5,7 @@ import swal from "sweetalert2";
 import { FetcherService } from "../fetcher.service";
 import { SignaturePad } from "ngx-signaturepad";
 import * as _ from 'lodash/fp';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: "app-drop-area",
@@ -12,7 +13,17 @@ import * as _ from 'lodash/fp';
   styleUrls: ["./drop-area.component.css"],
 })
 export class DropAreaComponent implements OnInit {
-  constructor(private fetchService: FetcherService) {}
+  
+  clickFormViewsubscription:Subscription;
+  constructor(private fetchService: FetcherService) {
+     
+  this.clickFormViewsubscription = this.fetchService.getFormClickEvent()
+  .subscribe((res)=>{
+    // console.log(res);
+    this.fetchService.screenData["existForm"] = true;
+    this.formDisplay(res["form"],res["screen"]);
+  })
+  }
 
   @ViewChild(SignaturePad) signaturePad: SignaturePad;
 
@@ -293,6 +304,7 @@ export class DropAreaComponent implements OnInit {
 
   ngOnInit() {
     console.log("in ngOnINit");
+    this.model.attributes = [];
     if (this.fetchService.screenData["existForm"] === true) {
       var fieldsArr = [];
 
@@ -314,10 +326,46 @@ export class DropAreaComponent implements OnInit {
             });
         }
       }
-      this.fetchService.model = this.model;
+      //this.fetchService.model = this.model;
     }
     if(this.fetchService.formFields.length > 0)
       this.model.attributes = this.fetchService.formFields;
+  }
+
+
+  //Getting called from Edit Component & getting click event in this constructor using Subscription
+  formDisplay(form, screen) {	
+   
+    var model = {	
+      'screenname': screen.ScreenName,	
+      'screenid': screen.ScreenID,	
+      'adminid': screen.CreatedBy,	
+      'existForm': true,	
+      'existTable': true,	
+      'formName': form.FormName,	
+      'formNames': [],	
+      'forms': [form]	
+    };
+    //console.log(model)
+    this.fetchService.formData = form;	
+    this.fetchService.screenData = model;	
+    var fieldsArr = []
+    this.fetchService.getFormFields(form["FormID"])
+      .subscribe((fields) =>
+      {
+        for (var i = 0; i < fields.length; i++)
+        {
+          fieldsArr.push(JSON.parse(fields[i].FieldJSON));
+        }
+        this.model.attributes = fieldsArr;
+      });
+      this.model.name = model["formName"];
+      this.model.description = form["FormDesc"];
+  }	
+
+  editForm()
+  {
+    
   }
 
   toggleValue(item) {
@@ -374,8 +422,8 @@ export class DropAreaComponent implements OnInit {
               }
               swal('Deleted!','Your Template has been deleted Completely.','success');
           }
-          this.model.name = "App name...";
-          this.model.description = "App Description...";
+          this.model.name = "Form name...";
+          this.model.description = "Form Description...";
           this.model.attributes = [];
         });
       }
@@ -436,6 +484,28 @@ export class DropAreaComponent implements OnInit {
 
 
   async saveForm() {
+
+    if(this.fetchService.screenData["existForm"]){
+    await swal({
+      title: "Do you want to use the Existing Dynamic Table to Store Form Data?",
+      text: "Select an option",
+      type: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#00B96F",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes",
+      cancelButtonText:"No",
+    }).then((res) => {
+      if(res.value)
+      {
+        this.fetchService.screenData["existTable"] = true;
+      }
+      else
+      {
+        this.fetchService.screenData["existTable"] = false;
+      }
+    });
+  }
 
     //Form ID generator
     var date = new Date();
@@ -499,7 +569,20 @@ export class DropAreaComponent implements OnInit {
                           this.fetchService.updateFormField(this.existingFormid,this.model.attributes[i].name,JSON.stringify(this.model.attributes[i]))
                           .subscribe((res) => {
                             console.log(res);
-
+                            swal({
+                              title: "Saving Form Fields Modifications",
+                              type: "info",
+                              showCancelButton: false,
+                              confirmButtonColor: "#00B96F",
+                              confirmButtonText: "OK",
+                            }).then((res) => {
+                              setTimeout(function () {
+                                swal("Saved in the DB","","success");
+                              }, 1300);
+                              setTimeout(function () {
+                                location.reload();
+                              }, 2800);
+                            })
                           });
                         }
                       }
@@ -518,14 +601,28 @@ export class DropAreaComponent implements OnInit {
     }
     else
     {
-      console.log(this.fetchService.screenData)
-      this.fetchService.postScreen(this.fetchService.screenData, "Yes", "No")
-        .subscribe((data: {}) => {
-          console.log(data);
+      //console.log(this.fetchService.screenData)
+      this.fetchService.getScreens().subscribe((data) => {
+        var screens = []	
+        data.forEach(obj => {	
+          screens.push(obj.ScreenID);
+        });	
 
+        if(screens.includes(this.fetchService.screenData["screenid"]))
+        {
           this.postForm();
-        });
-      
+        }
+        else
+        {
+          this.fetchService.postScreen(this.fetchService.screenData, "Yes", "No")
+            .subscribe((data: {}) => {
+              console.log(data);
+
+              this.postForm();
+          });
+        }
+      });
+           
     }
     
   }
@@ -578,6 +675,21 @@ export class DropAreaComponent implements OnInit {
 
               this.fetchService.alterDynamicTable(ress[0].DSDName, labels)
                 .subscribe((res) => {
+                  swal({
+                    title: "Form is Saving",
+                    type: "info",
+                    showCancelButton: false,
+                    confirmButtonColor: "#00B96F",
+                    confirmButtonText: "OK",
+                  }).then((res) => {
+                      setTimeout(function () {
+                        swal("Saved in the DB","","success");
+                      }, 1300);
+                      setTimeout(function () {
+                        location.reload();
+                      },2800);
+                  })
+                  
                   console.log(res);
               });
 
@@ -596,11 +708,26 @@ export class DropAreaComponent implements OnInit {
             this.fetchService.createDynamicTable(dynamictable, labels)
               .subscribe((data: {}) => {
                 console.log(data);
+
+                swal({
+                  title: "Form is Saving",
+                  type: "info",
+                  showCancelButton: false,
+                  confirmButtonColor: "#00B96F",
+                  confirmButtonText: "OK",
+                }).then((res) => {
+                    setTimeout(function () {
+                      swal("Saved in the DB","","success");
+                    }, 1300);
+                    setTimeout(function () {
+                      location.reload();
+                    }, 2800);
+                })
               });
           }
 
           this.fetchService.model = this.model;
-          alert("Saved in DB");
+          
 
         });
     }); 

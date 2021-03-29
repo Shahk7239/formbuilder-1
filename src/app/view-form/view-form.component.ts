@@ -16,6 +16,8 @@ export class ViewFormComponent implements OnInit {
     private fetchService: FetcherService
   ) { }
 
+  @Input() form = {};
+
   @ViewChild(SignaturePad) signaturePad: SignaturePad;
    
   private signaturePadOptions: Object = { // passed through to szimek/signature_pad constructor
@@ -26,11 +28,11 @@ export class ViewFormComponent implements OnInit {
   };
 
  
-  ngAfterViewInit() {
-    // this.signaturePad is now available
-    this.signaturePad.set('minWidth', 5); // set szimek/signature_pad options at runtime
-    this.signaturePad.clear(); // invoke functions from szimek/signature_pad API
-  }
+  // ngAfterViewInit() {
+  //   // this.signaturePad is now available
+  //   this.signaturePad.set('minWidth', 5); // set szimek/signature_pad options at runtime
+  //   this.signaturePad.clear(); // invoke functions from szimek/signature_pad API
+  // }
 
   drawComplete() {
     // will be notified of szimek/signature_pad's onEnd event
@@ -215,29 +217,54 @@ export class ViewFormComponent implements OnInit {
 
   forms = [];
   getAvailableForms(){
+    var fieldsArr = [];
+    //console.log(this.form)
+    this.forms.push(this.form["ScreenFormID"]);
+    this.model.name = this.form["FormName"];
+    this.model.description = this.form["FormDesc"];
+    this.fetchService.getFormFields(this.form["ScreenFormID"])
+    .subscribe((fields) => {
     
-    var fieldsArr = []
-    this.fetchService.getForm(this.fetchService.screenData["screenid"])
-    .subscribe((res)=>{
-      
-      //For each form, get all fields
-      for(var i=0;i<1;i++)
+      for(var i=0;i<fields.length;i++)
       {
-        this.forms.push(res[0].ScreenFormID);
-        this.model.name = res[0].FormName;
-        this.model.description = res[0].FormDesc;
-        this.fetchService.getFormFields(res[0].ScreenFormID)
-        .subscribe((fields) => {
-
-          for(var i=0;i<fields.length;i++)
-          {
-            fieldsArr.push(JSON.parse(fields[i].FieldJSON));
-          }
-          this.model.attributes = fieldsArr;
-        });
+        fieldsArr.push(JSON.parse(fields[i].FieldJSON));
       }
+      this.model.attributes = fieldsArr;
+    });
+    // var fieldsArr = []
+    // this.fetchService.getForm(this.fetchService.screenData["screenid"])
+    // .subscribe((res)=>{
+      
+    //   //For each form, get all fields
+    //   for(var i=0;i<1;i++)
+    //   {
+    //     this.forms.push(res[0].ScreenFormID);
+    //     this.model.name = res[0].FormName;
+    //     this.model.description = res[0].FormDesc;
+    //     this.fetchService.getFormFields(res[0].ScreenFormID)
+    //     .subscribe((fields) => {
 
-      });
+    //       for(var i=0;i<fields.length;i++)
+    //       {
+    //         fieldsArr.push(JSON.parse(fields[i].FieldJSON));
+    //       }
+    //       this.model.attributes = fieldsArr;
+    //     });
+    //   }
+      
+    //     //  this.fetchService.getFormFields(this.fetchService.formData["FormID"])
+    //     // .subscribe((fields) => {
+    //     //   this.forms.push(this.fetchService.formData["ScreenFormID"]);
+    //     //   this.model.name = this.fetchService.formData["FormName"];
+    //     //   this.model.description = this.fetchService.formData["FormDesc"];
+    //     //   for(var i=0;i<fields.length;i++)
+    //     //   {
+    //     //     fieldsArr.push(JSON.parse(fields[i].FieldJSON));
+    //     //   }
+    //     //   this.model.attributes = fieldsArr;
+    //     // });
+
+    // });
     
   } 
 
@@ -313,7 +340,7 @@ export class ViewFormComponent implements OnInit {
 
       if(values.length > 0)
       {
-        this.fetchService.getFormDSD(this.forms[0])
+        this.fetchService.getFormDSD(this.form["FormID"])
         .subscribe((ress)=>{
 
             this.fetchService.postDynamicTable(ress[0].DSDName,labels,values)

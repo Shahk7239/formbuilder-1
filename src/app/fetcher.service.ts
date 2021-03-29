@@ -5,6 +5,7 @@ import { Subscription } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { Observable, throwError } from 'rxjs';
 import { catchError, retry } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -23,7 +24,13 @@ export class FetcherService {
 
   constructor(private httpClient: HttpClient) { }
 
-
+  private subject = new Subject<any>();
+  sendFormClickEvent(form,screen) {
+    this.subject.next({form:form,screen:screen});
+  }
+  getFormClickEvent(): Observable<any>{ 
+    return this.subject.asObservable();
+  }
   
   //----------------------------- OLD SERVICES  -----------------
 
