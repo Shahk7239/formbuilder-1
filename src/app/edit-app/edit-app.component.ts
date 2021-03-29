@@ -1,13 +1,16 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { field, value } from '../global.model';
 import { ActivatedRoute, Router } from '@angular/router';
 import swal from 'sweetalert2';
 import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
-import {FetcherService} from '../fetcher.service'
+import {FetcherService} from '../fetcher.service';
+import { NgbModalConfig, NgbModal } from '@ng-bootstrap/ng-bootstrap';
+
 @Component({
   selector: 'app-edit-app',
   templateUrl: './edit-app.component.html',
-  styleUrls: ['./edit-app.component.css']
+  styleUrls: ['./edit-app.component.css'],
+  providers: [NgbModalConfig, NgbModal]
 })
 export class EditAppComponent implements OnInit {
   report: boolean = false;
@@ -178,12 +181,29 @@ export class EditAppComponent implements OnInit {
     attributes:this.modelFields
   };
 
-  
+  @ViewChild('content', { static: true }) myModal: ElementRef;	
+  getScreens: any;	
+  getForms: any;	
+  viewForm: boolean = false;	
+  formFields: any;	
+  editForm: any;	
+  popup: boolean = false;
 
   constructor(
     private route:ActivatedRoute, private fetchService: FetcherService,
-    private router:Router
-  ) { }
+    private router:Router,config: NgbModalConfig, private modalService: NgbModal
+  )
+  {	
+    config.backdrop = 'static';	
+    config.keyboard = false;	
+  }	
+  openPopup(content) {	
+    this.popup = true;	
+    this.modalService.open(content);	
+  }	
+  closePopup(data) {	
+    this.modalService.dismissAll();	
+  }
 
  
   addForm() {
@@ -271,11 +291,81 @@ export class EditAppComponent implements OnInit {
 
   ngOnInit() {
     this.fetchService.dropArr = this.dropArr;
-    
+    this.getScreensData();
 
   }
 
-  
+  getScreensData() {	
+    this.fetchService.getScreens().subscribe((data) => {	
+      this.getScreens = data;	
+      var tempArray = [];	
+      this.getScreens.forEach(obj => {	
+        this.fetchService.getForm(obj.ScreenID).subscribe((forms) => {	
+          forms.forEach(childobj => {	
+            tempArray.push(childobj);	
+          });	
+        });	
+      });	
+      this.getForms = tempArray;	
+    });	
+  }	
+
+  formDisplay(form, screen) {	
+    var model = {	
+      'screenname': screen.ScreenName,	
+      'screenid': screen.ScreenID,	
+      'adminid': screen.CreatedBy,	
+      'existForm': true,	
+      'existTable': true,	
+      'formName': form.formName,	
+      'formNames': [],	
+      'forms': [form]	
+    };
+    this.viewForm = true;	
+    this.fetchService.formData = form;	
+    this.fetchService.screenData = model;	
+    this.router.navigateByUrl('/viewform');	
+  }	
+
+  formEdit(form, screen) {	
+    var model = {	
+      'screenname': screen.ScreenName,	
+      'screenid': screen.ScreenID,	
+      'adminid': screen.CreatedBy,	
+      'existForm': true,	
+      'existTable': true,	
+      'formName': form.formName,	
+      'formNames': [],	
+      'forms': [form]	
+    };	
+
+    this.fetchService.screenData = model;	
+    this.fetchService.formData = form;	
+    this.fetchService.getFormFields(form.FormID).subscribe((data) => {	
+      this.formFields = data;	
+      var fields = [];	
+      this.formFields.forEach(element => {	
+        fields.push(JSON.parse(element.FieldJSON));        	
+      });	
+      this.fetchService.formFields = fields;	
+      this.editForm = form.FormID;	
+      this.router.navigateByUrl('/createform');
+    });	
+  }	
+
+  addScreenForm(screen) {	
+    var model = {	
+      'screenname': screen.ScreenName,	
+      'screenid': screen.ScreenID,	
+      'adminid': screen.CreatedBy,	
+      'existForm': true,	
+      'existTable': true,	
+      'formName': '',	
+      'formNames': [],	
+      'forms': []	
+    };	
+    this.fetchService.screenData = model;	
+  }
   
   
 

@@ -17,7 +17,9 @@ export class FetcherService {
   public model = {}
   public existingForms = false;
   public formNameFromAddScreen = "";
-  public formsFromAddScreen = []
+  public formsFromAddScreen = [];
+  public formData: any;
+  public formFields = [];
 
   constructor(private httpClient: HttpClient) { }
 
@@ -129,6 +131,11 @@ export class FetcherService {
         .pipe(catchError(this.handleError));
   }
 
+  getScreens()
+  {
+    return this.httpClient.get<any>(this.url+"/getScreens")
+    .pipe(catchError(this.handleError));
+  }
 
   postScreenForm(ScreenFormID,ScreenID, FormName,FormDesc)
   {
@@ -174,9 +181,9 @@ export class FetcherService {
         .pipe(catchError(this.handleError));
   }
 
-  postFormField(FormField, FormID, FieldJSON,Row)
+  postFormField(FieldID, Label,FormID, FieldJSON,Row)
   {
-    const body = {"FormField":FormField,"FormID":FormID,"FieldJSON":FieldJSON,"Row":Row};
+    const body = {"FieldID":FieldID, "Label":Label,"FormID":FormID,"FieldJSON":FieldJSON,"Row":Row};
     return this.httpClient.post<any>(this.url+"/postFormField",body)
         .pipe(catchError(this.handleError));
   }
@@ -185,6 +192,15 @@ export class FetcherService {
   {
     const body = {"FormID":FormID};
     return this.httpClient.post<any>(this.url+"/getFormFields",body)
+        .pipe(catchError(this.handleError));
+  }
+
+  
+  updateFormField(FormID,FieldID,FieldJSON)
+  {
+    const body = {"FieldID":FieldID,"FormID":FormID,"FieldJSON":FieldJSON};
+    //console.log(body);
+    return this.httpClient.post<any>(this.url+"/updateFormField",body)
         .pipe(catchError(this.handleError));
   }
 
@@ -231,6 +247,21 @@ export class FetcherService {
       .pipe(catchError(this.handleError));
   }
 
+
+
+  // deleteFormID(FormID)
+  // {
+  //   const body = {"FormID":FormID};
+  //   return this.httpClient.post<any>(this.url+"/deleteFormID",body)
+  //       .pipe(catchError(this.handleError)); 
+  // }
+
+  DropTable(TableName)
+  {
+    const body = {"TableName":TableName};
+    return this.httpClient.post<any>(this.url+"/DropTable",body)
+      .pipe(catchError(this.handleError));
+  }
 
   //---------------------------- Handle errors for API calls -----------------
   handleError(error) {

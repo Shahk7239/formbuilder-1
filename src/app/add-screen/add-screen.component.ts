@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit,  Output, EventEmitter, ViewChild, Input } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import { FetcherService } from '../fetcher.service';
@@ -10,6 +10,9 @@ import {SignaturePad} from 'ngx-signaturepad';
   styleUrls: ['./add-screen.component.css']
 })
 export class AddScreenComponent implements OnInit {
+
+  @Output() newItemEvent = new EventEmitter();	
+  @Input('popup') popup: boolean = false;
 
   constructor(private router:Router,
     private fetchService:FetcherService) { }
@@ -47,9 +50,10 @@ export class AddScreenComponent implements OnInit {
       this.model.formNames = [];
       this.fetchService.getForm(this.model.screenid)
       .subscribe((res) => {
+        
         res.map((data) => {
-          this.model.formNames.push(data.FormName)
-          this.model.forms.push(data)
+          this.model.formNames.push(data.FormName);
+          this.model.forms.push(data);
         })
 
       });
@@ -68,7 +72,11 @@ export class AddScreenComponent implements OnInit {
 
     this.fetchService.screenData = this.model;
     
-    this.router.navigateByUrl('/createform');
+    if(this.popup) {	
+      this.newItemEvent.emit('close');	
+    } else {	
+      this.router.navigateByUrl('/createform');	
+    }
   }
 
 }
