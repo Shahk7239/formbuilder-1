@@ -15,6 +15,9 @@ import { AddScreenComponent } from './add-screen/add-screen.component';
 import { NotfoundComponent } from './notfound/notfound.component';
 import {SignaturePadModule} from 'ngx-signaturepad';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { TestViewComponent } from './test-view/test-view.component';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import {MatStepperModule} from '@angular/material/stepper';
 
 const appRoutes: Routes = [
   { path: '', component: EditAppComponent },
@@ -28,7 +31,8 @@ const appRoutes: Routes = [
     ViewFormComponent,
     routingComponent,
     AddScreenComponent,
-    NotfoundComponent
+    NotfoundComponent,
+    TestViewComponent
   ],
   imports: [
     RouterModule.forRoot(appRoutes),
@@ -39,7 +43,9 @@ const appRoutes: Routes = [
     DndModule,
     HttpClientModule,
     SignaturePadModule,
-    NgbModule
+    NgbModule,
+    NoopAnimationsModule,
+    MatStepperModule,
   ],
   providers: [FetcherService],
   bootstrap: [AppComponent]

@@ -3,9 +3,9 @@
     <div class="col-12">
         <div class="btn-cont">
             <!-- <button (click)="initReport()" class="btn btn-primary pull-left">Response</button> -->
-            <button (click)="addForm()" class="btn btn-primary pull-right" style="margin-left:3px;">Add Form</button>
-            <button (click)="updateForm()" class="btn btn-primary pull-right">Update</button>
-            <button routerLink="/viewform"  class="btn btn-success pull-right" style="margin-right:3px;">View <i class="fa fa-external-link"></i></button>
+            <!-- <button (click)="addForm()" class="btn btn-primary pull-right" style="margin-left:3px;">Add Form</button> -->
+            <!-- <button (click)="updateForm()" class="btn btn-primary pull-right">Update</button> -->
+            <a routerLink="/test" target="_blank" class="btn btn-success pull-right" style="margin-right:3px;">View <i class="fa fa-external-link"></i></a>
           
           </div>
     </div>
@@ -37,7 +37,7 @@
     </div>
 
     <!--style="overflow-x:hidden;overflow-y:scroll;float:right;height: 700px;"-->
-    <div class="col-6">
+    <div class="col-7">
 
       <!--a dropzone-->
       <!--to allow dropping content that is not [dndDraggable] set dndAllowExternal to true-->
@@ -46,33 +46,38 @@
         <hr>
         <app-drop-area [indexval]="drop"  [editForm]="editForm" ></app-drop-area>
       </div>
-
     </div>
-      <div class="col-3">	
-        <h4>List of Components</h4>	
+
+    <div class="col-2" style="margin-top: 20px;">	
+        <h4>Components</h4>	
         <hr>	
-        <button type="button" class="btn btn-outline-primary" (click)="openPopup(content)"><i class="fa fa-plus"></i>&nbsp;Add Screen</button>	
+        <button type="button" class="btn btn-outline-primary btn-sm" (click)="openPopup(content)"><i class="fa fa-plus"></i>&nbsp;Add Screen</button>	
         <hr>	
+
+        <div *ngIf="getScreens.length < 1">
+          <span>No Screens Yet</span>
+        </div>
         <div *ngFor="let screen of getScreens">	
           <h5 style="display: inline;">{{screen.ScreenName}}</h5>	
           &nbsp;	
-          <button type="button" class="btn btn-secondary" (click)="addScreenForm(screen)"><i class="fa fa-plus"></i>&nbsp;Add Form</button>	
+          <button type="button" class="btn btn-secondary btn-sm" (click)="addScreenForm(screen)"><i class="fa fa-plus"></i>&nbsp;Add Form</button>	
           <ul *ngFor="let form of getForms">	
             <li *ngIf="form.ScreenID==screen.ScreenID" style="line-height: 2;">	
               <a href="javascript:void(0)" (click)="formDisplay(form, screen)">{{form.FormName}}</a>	
               &nbsp;	
-              <a href="javascript: void(0);" (click)="formEdit(form, screen)"><i class="fa fa-edit"></i></a>	
+              <!-- <a href="javascript: void(0);" (click)="formEdit(form, screen)"><i class="fa fa-edit"></i></a>	 -->
             </li>	
           </ul>	
           <hr>	
         </div>	
     </div>
+
   </div>
 </div>
 
 <ng-template #content let-c="close" let-d="dismiss">	
   <div class="modal-header">	
-    <h4 class="modal-title" id="modal-basic-title">Screen Add</h4>	
+    <h4 class="modal-title" id="modal-basic-title">Add a Screen</h4>	
     <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">	
       <span aria-hidden="true">&times;</span>	
     </button>	
