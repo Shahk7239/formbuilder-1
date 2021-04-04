@@ -2,7 +2,7 @@ import { Component, OnInit,  Output, EventEmitter, ViewChild, Input } from '@ang
 import { NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import { FetcherService } from '../fetcher.service';
-import {SignaturePad} from 'ngx-signaturepad';
+// import {SignaturePad} from 'ngx-signaturepad';
 import swal from 'sweetalert2';
 
 @Component({
@@ -37,36 +37,36 @@ export class AddScreenComponent implements OnInit {
     }
   }
 
-  @ViewChild(SignaturePad) signaturePad: SignaturePad;
+  // @ViewChild(SignaturePad) signaturePad: SignaturePad;
 
-  drawComplete() {
-    // will be notified of szimek/signature_pad's onEnd event
-    console.log(this.signaturePad.toDataURL('img/png'));
-  }
+  // drawComplete() {
+  //   // will be notified of szimek/signature_pad's onEnd event
+  //   console.log(this.signaturePad.toDataURL('img/png'));
+  // }
 
-  FormTemplates():void
-  {
-    if(this.prevScreenID !== this.model.screenid && this.model.screenid !== '')
-    {
-      this.model.formNames = [];
-      this.fetchService.getForm(this.model.screenid)
-      .subscribe((res) => {
+  // FormTemplates():void
+  // {
+  //   if(this.prevScreenID !== this.model.screenid && this.model.screenid !== '')
+  //   {
+  //     this.model.formNames = [];
+  //     this.fetchService.getForm(this.model.screenid)
+  //     .subscribe((res) => {
         
-        res.map((data) => {
-          this.model.formNames.push(data.FormName);
-          this.model.forms.push(data);
-        })
+  //       res.map((data) => {
+  //         this.model.formNames.push(data.FormName);
+  //         this.model.forms.push(data);
+  //       })
 
-      });
-    }
-    if(this.model.screenid === '')
-    {
-      this.model.formNames = [];
-      this.model.forms = [];
-    }
+  //     });
+  //   }
+  //   if(this.model.screenid === '')
+  //   {
+  //     this.model.formNames = [];
+  //     this.model.forms = [];
+  //   }
       
-    this.prevScreenID = this.model.screenid;
-  }
+  //   this.prevScreenID = this.model.screenid;
+  // }
 
   
   async nextPage(screenForm:NgForm) {
