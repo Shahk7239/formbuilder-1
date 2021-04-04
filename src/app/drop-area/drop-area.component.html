@@ -1,12 +1,16 @@
 <div>
-  <button (click)="deleteAttributes()" class="btn btn-danger pull-right"
-  style="margin-left:3px;margin-bottom: 1em;">
-  Delete Template
+  <button (click)="saveForm()" class="btn pull-right"
+    style="margin-left:8px;margin-bottom: 1em;background-color:aqua">
+    <i class="fa fa-save"></i>
   </button>
   <!-- <button class="btn pull-right" (click)="deleteForm(indexval)" style="margin-left: 10px;">X</button> -->
-  <button (click)="saveForm()" class="btn btn-success"
-    style="margin-left:3px;margin-bottom: 1em;">
-    Save
+  <button (click)="editForm()" class="btn pull-right"
+    style="margin-left:8px;margin-bottom: 1em;background-color:rgb(211, 205, 205);color: rgb(6, 7, 7);">
+    <i class="fa fa-edit"></i>
+  </button>
+  <button (click)="deleteOption()" class="btn btn-danger pull-right"
+    style="margin-left:8px;margin-bottom: 1em;">
+    <i class="fa fa-trash" style="color: white;"></i>
   </button>
 </div>
 <div class="form-group" style="margin-bottom: 0px !important; padding: 0px 0px 5px 0px;"
@@ -121,8 +125,8 @@
         <input class="form-control" type="text" [(ngModel)]="item.label" />
       </div>
       <div class="form-group">
-        <label>Name</label>
-        <input class="form-control" type="text" [(ngModel)]="item.name" />
+        <label>Name <small style="color: red;">(Auto Generated)</small></label>
+        <input class="form-control" disabled style="background-color:rgb(207, 203, 203);" type="text" [(ngModel)]="item.name"/>
       </div>
       <div class="form-group">
         <label>Placeholder</label>
@@ -130,7 +134,7 @@
       </div>
       <div class="form-group">
         <label>Regex</label>
-        <input class="form-control" type="text" [(ngModel)]="item.regex" />
+        <input class="form-control" disabled style="background-color:rgb(207, 203, 203);" type="text" [(ngModel)]="item.regex" />
       </div>
       <div *ngIf="item.regex" class="form-group">
         <label>Error text</label>

@@ -1,6 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule, Routes, ActivatedRoute, ActivatedRouteSnapshot} from '@angular/router';
 import { AppRoutingModule, routingComponent } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -14,6 +14,20 @@ import { ViewFormComponent } from './view-form/view-form.component';
 import { AddScreenComponent } from './add-screen/add-screen.component';
 import { NotfoundComponent } from './notfound/notfound.component';
 import {SignaturePadModule} from 'ngx-signaturepad';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { TestViewComponent } from './test-view/test-view.component';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import {MatStepperModule} from '@angular/material/stepper';
+import { ViewDataComponent } from './view-data/view-data.component';
+import {MatTabsModule} from '@angular/material/tabs';
+import {MatAutocompleteModule} from '@angular/material/autocomplete';
+import {MatInputModule} from '@angular/material/input';
+import {MatButtonModule} from '@angular/material/button';
+import {MatCheckboxModule} from '@angular/material/checkbox';
+import {MatChipsModule} from '@angular/material/chips';
+import {MatIconModule} from '@angular/material/icon';
+import {MatTableModule} from '@angular/material/table';
+
 
 const appRoutes: Routes = [
   { path: '', component: EditAppComponent },
@@ -27,7 +41,9 @@ const appRoutes: Routes = [
     ViewFormComponent,
     routingComponent,
     AddScreenComponent,
-    NotfoundComponent
+    NotfoundComponent,
+    TestViewComponent,
+    ViewDataComponent
   ],
   imports: [
     RouterModule.forRoot(appRoutes),
@@ -37,7 +53,19 @@ const appRoutes: Routes = [
     AppRoutingModule,
     DndModule,
     HttpClientModule,
-    SignaturePadModule
+    SignaturePadModule,
+    NgbModule,
+    NoopAnimationsModule,
+    MatStepperModule,
+    MatTabsModule,
+    MatAutocompleteModule,
+    MatInputModule,
+    ReactiveFormsModule,
+    MatButtonModule,
+    MatCheckboxModule,
+    MatChipsModule,
+    MatIconModule,
+    MatTableModule
   ],
   providers: [FetcherService],
   bootstrap: [AppComponent]

@@ -16,6 +16,8 @@ export class ViewFormComponent implements OnInit {
     private fetchService: FetcherService
   ) { }
 
+  @Input() form = {};
+
   @ViewChild(SignaturePad) signaturePad: SignaturePad;
    
   private signaturePadOptions: Object = { // passed through to szimek/signature_pad constructor
@@ -26,11 +28,11 @@ export class ViewFormComponent implements OnInit {
   };
 
  
-  ngAfterViewInit() {
-    // this.signaturePad is now available
-    this.signaturePad.set('minWidth', 5); // set szimek/signature_pad options at runtime
-    this.signaturePad.clear(); // invoke functions from szimek/signature_pad API
-  }
+  // ngAfterViewInit() {
+  //   // this.signaturePad is now available
+  //   this.signaturePad.set('minWidth', 5); // set szimek/signature_pad options at runtime
+  //   this.signaturePad.clear(); // invoke functions from szimek/signature_pad API
+  // }
 
   drawComplete() {
     // will be notified of szimek/signature_pad's onEnd event
@@ -215,29 +217,54 @@ export class ViewFormComponent implements OnInit {
 
   forms = [];
   getAvailableForms(){
+    var fieldsArr = [];
+    //console.log(this.form)
+    this.forms.push(this.form["ScreenFormID"]);
+    this.model.name = this.form["FormName"];
+    this.model.description = this.form["FormDesc"];
+    this.fetchService.getFormFields(this.form["ScreenFormID"])
+    .subscribe((fields) => {
     
-    var fieldsArr = []
-    this.fetchService.getForm(this.fetchService.screenData["screenid"])
-    .subscribe((res)=>{
-      
-      //For each form, get all fields
-      for(var i=0;i<1;i++)
+      for(var i=0;i<fields.length;i++)
       {
-        this.forms.push(res[0].ScreenFormID);
-        this.model.name = res[0].FormName;
-        this.model.description = res[0].FormDesc;
-        this.fetchService.getFormFields(res[0].ScreenFormID)
-        .subscribe((fields) => {
-
-          for(var i=0;i<fields.length;i++)
-          {
-            fieldsArr.push(JSON.parse(fields[i].FieldJSON));
-          }
-          this.model.attributes = fieldsArr;
-        });
+        fieldsArr.push(JSON.parse(fields[i].FieldJSON));
       }
+      this.model.attributes = fieldsArr;
+    });
+    // var fieldsArr = []
+    // this.fetchService.getForm(this.fetchService.screenData["screenid"])
+    // .subscribe((res)=>{
+      
+    //   //For each form, get all fields
+    //   for(var i=0;i<1;i++)
+    //   {
+    //     this.forms.push(res[0].ScreenFormID);
+    //     this.model.name = res[0].FormName;
+    //     this.model.description = res[0].FormDesc;
+    //     this.fetchService.getFormFields(res[0].ScreenFormID)
+    //     .subscribe((fields) => {
 
-      });
+    //       for(var i=0;i<fields.length;i++)
+    //       {
+    //         fieldsArr.push(JSON.parse(fields[i].FieldJSON));
+    //       }
+    //       this.model.attributes = fieldsArr;
+    //     });
+    //   }
+      
+    //     //  this.fetchService.getFormFields(this.fetchService.formData["FormID"])
+    //     // .subscribe((fields) => {
+    //     //   this.forms.push(this.fetchService.formData["ScreenFormID"]);
+    //     //   this.model.name = this.fetchService.formData["FormName"];
+    //     //   this.model.description = this.fetchService.formData["FormDesc"];
+    //     //   for(var i=0;i<fields.length;i++)
+    //     //   {
+    //     //     fieldsArr.push(JSON.parse(fields[i].FieldJSON));
+    //     //   }
+    //     //   this.model.attributes = fieldsArr;
+    //     // });
+
+    // });
     
   } 
 
@@ -286,17 +313,17 @@ export class ViewFormComponent implements OnInit {
     }   
 
     var attr = this.model.attributes;
-        var labels = []
-        var values = []
+    var labels = []
+    var values = []
 
-        for(var i=0;i<attr.length;i++)
-        {
-            if(attr[i].label != "Submit" && attr[i].value !== undefined && attr[i].value != ""){
+      for(var i=0;i<attr.length;i++)
+      {
+          if(attr[i].type != "button" && attr[i].value !== undefined && attr[i].value != ""){
               labels.push(attr[i].label.replace(/\s+/g, '_'));
               values.push(attr[i].value);
-            }
-            if(attr[i].type === "checkbox")
-            {
+          }
+          if(attr[i].type === "checkbox")
+          {
               labels.push(attr[i].label.replace(/\s+/g, '_'));
               var checkBox = attr[i].values;
               var val = ""
@@ -308,59 +335,23 @@ export class ViewFormComponent implements OnInit {
               })
               val = val.slice(0,-2);
               values.push(val);
-              //console.log(val);
-            }
-        }
-        //console.log(this.forms)
+          }
+      }
 
-        this.fetchService.getFormDSD(this.forms[0])
+      if(values.length > 0)
+      {
+        this.fetchService.getFormDSD(this.form["FormID"])
         .subscribe((ress)=>{
 
-          this.fetchService.postDynamicTable(ress[0].DSDName,labels,values)
-          .subscribe((res) => {
-            console.log(res);
+            this.fetchService.postDynamicTable(ress[0].DSDName,labels,values)
+            .subscribe((res) => {
+              console.log(res);
+
+            });
 
           });
-
-        });
-
-    // //Saving to DB
-    // var attr = this.model.attributes;
-    // var labels = []
-    // var values = []
-
-    // for(var i=0;i<attr.length;i++)
-    // {
-    //     if(attr[i].label != "Submit" && attr[i].value !== undefined && attr[i].value != ""){
-    //       labels.push(attr[i].label.replace(/\s+/g, '_'));
-    //       values.push(attr[i].value);
-    //     }
-    //     if(attr[i].type === "checkbox")
-    //     {
-    //       labels.push(attr[i].label.replace(/\s+/g, '_'));
-    //       var checkBox = attr[i].values;
-    //       var val = ""
-    //       checkBox.map((obj)=> {
-    //         if(obj.selected === true)
-    //         {
-    //           val = val + obj.value + ", ";
-    //         }
-    //       })
-    //       val = val.slice(0,-2);
-    //       values.push(val);
-    //       //console.log(val);
-    //     }
-    // }
-    // if(labels.length > 0){
-    //   //console.log(labels)
-    //   //console.log(values)
-    //   var body = {"dbName":this.fetchService.screenData["orgname"],"formID":"ID","labels":labels,"values" :values};
-    //   (this.fetchService.postForm(body))
-    //   .subscribe((data:{}) =>{
-    //     console.log(data);
-    //   });
-    // }
-
+      }
+      
     
     alert("Saved")
     this.clearInputs();
@@ -368,20 +359,13 @@ export class ViewFormComponent implements OnInit {
     input.append('formId',this.model._id);
     input.append('attributes',JSON.stringify(this.model.attributes))
 
-    // this.us.postDataApi('/user/formFill',input).subscribe(r=>{
-    //   console.log(r);
-    //   swal('Success','You have contact sucessfully','success');
-    //   this.success = true;
-    // },error=>{
-    //   swal('Error',error.message,'error');
-    // });
   }
 
   clearInputs(){
     var attr = this.model.attributes;
     for(var i=0;i<attr.length;i++)
     {
-        if(attr[i].label != "Submit"){
+        if(!attr[i].name.includes("button")){
           attr[i].value = "";
         }
     }

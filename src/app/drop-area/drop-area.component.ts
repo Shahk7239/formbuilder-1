@@ -4,6 +4,8 @@ import { field, value } from "../global.model";
 import swal from "sweetalert2";
 import { FetcherService } from "../fetcher.service";
 import { SignaturePad } from "ngx-signaturepad";
+import * as _ from 'lodash/fp';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: "app-drop-area",
@@ -11,7 +13,17 @@ import { SignaturePad } from "ngx-signaturepad";
   styleUrls: ["./drop-area.component.css"],
 })
 export class DropAreaComponent implements OnInit {
-  constructor(private fetchService: FetcherService) {}
+  
+  clickFormViewsubscription:Subscription;
+  constructor(private fetchService: FetcherService) {
+     
+  this.clickFormViewsubscription = this.fetchService.getFormClickEvent()
+  .subscribe((res)=>{
+    // console.log(res);
+    this.fetchService.screenData["existForm"] = true;
+    this.formDisplay(res["form"],res["screen"]);
+  })
+  }
 
   @ViewChild(SignaturePad) signaturePad: SignaturePad;
 
@@ -292,6 +304,7 @@ export class DropAreaComponent implements OnInit {
 
   ngOnInit() {
     console.log("in ngOnINit");
+    this.model.attributes = [];
     if (this.fetchService.screenData["existForm"] === true) {
       var fieldsArr = [];
 
@@ -313,26 +326,106 @@ export class DropAreaComponent implements OnInit {
             });
         }
       }
-      this.fetchService.model = this.model;
+      //this.fetchService.model = this.model;
     }
+    if(this.fetchService.formFields.length > 0)
+      this.model.attributes = this.fetchService.formFields;
+  }
+
+
+  //Getting called from Edit Component & getting click event in this constructor using Subscription
+  formDisplay(form, screen) {	
+   
+    var model = {	
+      'screenname': screen.ScreenName,	
+      'screenid': screen.ScreenID,	
+      'adminid': screen.CreatedBy,	
+      'existForm': true,	
+      'existTable': true,	
+      'formName': form.FormName,	
+      'formNames': [],	
+      'forms': [form]	
+    };
+    //console.log(model)
+    this.fetchService.formData = form;	
+    this.fetchService.screenData = model;	
+    var fieldsArr = []
+    this.fetchService.getFormFields(form["FormID"])
+      .subscribe((fields) =>
+      {
+        for (var i = 0; i < fields.length; i++)
+        {
+          fieldsArr.push(JSON.parse(fields[i].FieldJSON));
+        }
+        this.model.attributes = fieldsArr;
+      });
+      this.model.name = model["formName"];
+      this.model.description = form["FormDesc"];
+  }	
+
+  editForm()
+  {
+    
   }
 
   toggleValue(item) {
     item.selected = !item.selected;
   }
 
-  deleteAttributes() {
+  deleteOption() {
     swal({
       title: "Delete Template?",
-      text: "Do you want to remove all fields?",
-      type: "warning",
+      text: "Do you want to Delete this Template?",
+      type: "question",
       showCancelButton: true,
       confirmButtonColor: "#00B96F",
       cancelButtonColor: "#d33",
       confirmButtonText: "Yes!",
     }).then((result) => {
       if (result.value) {
-        this.model.attributes = [];
+
+        swal({
+          title: "There is some data that has been previously acquired by this "+this.fetchService.screenData["formName"],
+          text: " Please select an option",
+          type: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#00B96F",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Keep Data and Delete this form",
+          cancelButtonText:"Delete both Data and Form",
+        }).then((res) => {
+          if(res.value)
+          {
+            //API call to drop table
+            for (var i = 0;i < this.fetchService.screenData["forms"].length;i++)
+              {
+                if (this.fetchService.screenData["formName"] === 
+                this.fetchService.screenData["forms"][i].FormName) 
+                {
+                  // this.fetchService.deleteFormID(this.fetchService.screenData["forms"][i].ScreenFormID)
+                  // .subscribe((res) => {
+                  //   console.log(res);
+
+                  // });
+
+                  this.fetchService.getFormDSD(this.fetchService.screenData["forms"][i].ScreenFormID)
+                    .subscribe((ress) => {
+
+                      this.fetchService.DropTable(ress[0].DSDName)
+                        .subscribe((res) => {
+                          console.log(res);
+                        });
+
+                    });
+                    break;
+                }
+              }
+              swal('Deleted!','Your Template has been deleted Completely.','success');
+          }
+          this.model.name = "Form name...";
+          this.model.description = "Form Description...";
+          this.model.attributes = [];
+        });
       }
     });
   }
@@ -383,105 +476,262 @@ export class DropAreaComponent implements OnInit {
     values.push(this.value);
     this.value = { label: "", value: "" };
   }
+  
+  fieldsArr = [];
+  existingFormid:string = '';
+  formFieldsOnly:boolean = false;
+  newFormID:string = '';
+
 
   async saveForm() {
+
+    if(this.fetchService.screenData["existForm"]){
+    await swal({
+      title: "Do you want to use the Existing Dynamic Table to Store Form Data?",
+      text: "Select an option",
+      type: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#00B96F",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes",
+      cancelButtonText:"No",
+    }).then((res) => {
+      if(res.value)
+      {
+        this.fetchService.screenData["existTable"] = true;
+      }
+      else
+      {
+        this.fetchService.screenData["existTable"] = false;
+      }
+    });
+  }
+
+    //Form ID generator
     var date = new Date();
-    var formid =
+    this.newFormID =
       ("00" + (date.getMonth() + 1)).slice(-2) + "" +
       ("00" + date.getDate()).slice(-2) + "" + date.getFullYear() + "_" +
       ("00" + date.getHours()).slice(-2) + "" +
       ("00" + date.getMinutes()).slice(-2) + "" +
       ("00" + date.getSeconds()).slice(-2);
-
-    console.log(formid);
-
-    if (this.fetchService.screenData["existForm"] === false)
+    
+    console.log(this.newFormID);
+ 
+    //If not existing form, then post screen data
+    if (this.fetchService.screenData["existForm"])
     {
-      this.fetchService.postScreen(this.fetchService.screenData, "Yes", "No")
-        .subscribe((data: {}) => {
-          console.log(data);
-        });
+          for (var i = 0; i < this.fetchService.screenData["forms"].length; i++) {
+          if (this.fetchService.screenData["formName"] === this.fetchService.screenData["forms"][i].FormName)
+          {
+            this.existingFormid = this.fetchService.screenData["forms"][i].ScreenFormID;
+              console.log(this.existingFormid);
+              this.fetchService.getFormFields(this.existingFormid)
+              .subscribe((fields) => {
+                
+                for(var i=0;i<fields.length;i++)
+                {
+                  this.fieldsArr.push(JSON.parse(fields[i].FieldJSON));
+                }
+
+                //To check if we add extra fields by removing old fields
+                var fieldsCountOnScreen = 0;
+                for(var i=0;i<this.fieldsArr.length;i++)
+                {
+                  for(var j = 0;j<this.model.attributes.length;j++)
+                  {
+                    if(this.model.attributes[j].name === this.fieldsArr[i].name)
+                    {
+                      fieldsCountOnScreen++;
+                    }
+                  }
+                }
+                
+                if(this.fieldsArr.length === this.model.attributes.length && 
+                  fieldsCountOnScreen === this.model.attributes.length)
+                {
+                  this.formFieldsOnly = true;
+                }
+                console.log(this.formFieldsOnly);
+                     
+                //If Form Fields Only modified, Update JSON only in Form Field Table
+                if(this.formFieldsOnly)
+                {
+                  console.log(this.formFieldsOnly);
+                  for(var i=0;i<this.fieldsArr.length;i++)
+                  {
+                    for(var j = 0;j<this.model.attributes.length;j++)
+                    {
+                      if(this.model.attributes[j].name === this.fieldsArr[i].name)
+                      {
+                        if(_.equals(this.model.attributes[i],this.fieldsArr[i]) === false)
+                        {
+                          this.fetchService.updateFormField(this.existingFormid,this.model.attributes[i].name,JSON.stringify(this.model.attributes[i]))
+                          .subscribe((res) => {
+                            console.log(res);
+                            swal({
+                              title: "Saving Form Fields Modifications",
+                              type: "info",
+                              showCancelButton: false,
+                              confirmButtonColor: "#00B96F",
+                              confirmButtonText: "OK",
+                            }).then((res) => {
+                              setTimeout(function () {
+                                swal("Saved in the DB","","success");
+                              }, 1300);
+                              setTimeout(function () {
+                                location.reload();
+                              }, 2800);
+                            })
+                          });
+                        }
+                      }
+                    }
+                  }
+                }
+                else
+                {
+                  this.postForm();
+                }
+              });
+            break;
+          }
+        }
+         
     }
     else
     {
-      for (var i = 0; i < this.fetchService.screenData["forms"].length; i++) {
-        if (this.fetchService.screenData["formName"] === this.fetchService.screenData["forms"][i].FormName)
+      //console.log(this.fetchService.screenData)
+      this.fetchService.getScreens().subscribe((data) => {
+        var screens = []	
+        data.forEach(obj => {	
+          screens.push(obj.ScreenID);
+        });	
+
+        if(screens.includes(this.fetchService.screenData["screenid"]))
         {
-          this.fetchService.modifyForm(this.fetchService.screenData["forms"][i].ScreenFormID,"Yes")
-            .subscribe((res) => {
-              console.log(res);
-            });
+          this.postForm();
         }
-      }
-    }
-    this.fetchService.postScreenForm(formid,this.fetchService.screenData["screenid"],this.model.name,this.model.description)
-      .subscribe((data: {}) => {
-        console.log(data);
+        else
+        {
+          this.fetchService.postScreen(this.fetchService.screenData, "Yes", "No")
+            .subscribe((data: {}) => {
+              console.log(data);
 
-        this.fetchService.postForm(formid,this.model.name,this.fetchService.screenData["adminid"],"Yes","No")
-          .subscribe((data: {}) => {
-            console.log(data);
-
-            for (var i = 0; i < this.model.attributes.length; i++)
-            {
-              this.fetchService.postFormField(this.model.attributes[i].label,formid,JSON.stringify(this.model.attributes[i]),i)
-                .subscribe((data: {}) => {
-                  console.log(data);
-                });
-            }
-
-            var attr = this.model.attributes;
-            var labels = [];
-            for (var i = 0; i < attr.length; i++)
-            {
-              if (this.model.attributes[i].label != "Submit")
-                labels.push(this.model.attributes[i].label.replace(/\s+/g, "_"));
-            }
-
-            if (this.fetchService.screenData["existTable"] === true)
-            {
-              for (var i = 0;i < this.fetchService.screenData["forms"].length;i++)
-              {
-                if (this.fetchService.screenData["formName"] === this.fetchService.screenData["forms"][i].FormName) 
-                {
-                  this.fetchService.getFormDSD(this.fetchService.screenData["forms"][i].ScreenFormID)
-                    .subscribe((ress) => {
-
-                      this.fetchService.postFormDSD(formid, ress[0].DSDName)
-                        .subscribe((data: {}) => {
-                          console.log(data);
-                        });
-
-                      this.fetchService.alterDynamicTable(ress[0].DSDName, labels)
-                        .subscribe((res) => {
-                          console.log(res);
-                        });
-
-                    });
-                  break;
-                }
-              }
-            }
-            else
-            {
-              //Dynamic table name
-              var dynamictable = "D_" + this.model.name.replace(/\s+/g, "_") + "_" + formid;
-
-              this.fetchService.postFormDSD(formid, dynamictable)
-                .subscribe((data: {}) => {
-                  console.log(data);
-                });
-
-              this.fetchService.createDynamicTable(dynamictable, labels)
-                .subscribe((data: {}) => {
-                  console.log(data);
-                });
-            }
-
-            this.fetchService.model = this.model;
-            alert("Saved in DB");
-
+              this.postForm();
           });
+        }
       });
+           
+    }
+    
   }
+
+  async postForm()
+  {
+    //Post Screen Form and Form Fields
+    if (this.fetchService.screenData["existForm"])
+    {
+      this.fetchService.modifyForm(this.existingFormid,"Yes")
+          .subscribe((res) => {
+            console.log(res);
+      });
+    }
+    this.fetchService.postScreenForm(this.newFormID,this.fetchService.screenData["screenid"],this.model.name,this.model.description)
+    .subscribe((data: {}) => {
+      console.log(data);
+
+      this.fetchService.postForm(this.newFormID,this.model.name,this.fetchService.screenData["adminid"],"Yes","No")
+        .subscribe((data: {}) => {
+          console.log(data);
+
+          for (var i = 0; i < this.model.attributes.length; i++)
+          {
+            this.fetchService.postFormField(this.model.attributes[i].name,this.model.attributes[i].label,this.newFormID,JSON.stringify(this.model.attributes[i]),i)
+              .subscribe((data: {}) => {
+                console.log(data);
+              });
+          }
+
+          var attr = this.model.attributes;
+          var labels = [];
+          for (var i = 0; i < attr.length; i++)
+          {
+            if (!this.model.attributes[i].name.includes("button"))
+              labels.push(this.model.attributes[i].label.replace(/\s+/g, "_"));
+          }
+
+          //If Existing Table, then Update < NewFormID, DynamicTable > Mapping and Alter Table
+
+          if (this.fetchService.screenData["existTable"] === true)
+          {
+            this.fetchService.getFormDSD(this.existingFormid)
+            .subscribe((ress) => {
+
+              this.fetchService.postFormDSD(this.newFormID, ress[0].DSDName)
+                .subscribe((data: {}) => {
+                  console.log(data);
+              });
+
+              this.fetchService.alterDynamicTable(ress[0].DSDName, labels)
+                .subscribe((res) => {
+                  swal({
+                    title: "Form is Saving",
+                    type: "info",
+                    showCancelButton: false,
+                    confirmButtonColor: "#00B96F",
+                    confirmButtonText: "OK",
+                  }).then((res) => {
+                      setTimeout(function () {
+                        swal("Saved in the DB","","success");
+                      }, 1300);
+                      setTimeout(function () {
+                        location.reload();
+                      },2800);
+                  })
+                  
+                  console.log(res);
+              });
+
+            });
+          }
+          else
+          {
+            //Else create New Dynamic table name and mapping
+            var dynamictable = "D_" + this.model.name.replace(/\s+/g, "_") + "_" + this.newFormID;
+
+            this.fetchService.postFormDSD(this.newFormID, dynamictable)
+              .subscribe((data: {}) => {
+                console.log(data);
+              });
+
+            this.fetchService.createDynamicTable(dynamictable, labels)
+              .subscribe((data: {}) => {
+                console.log(data);
+
+                swal({
+                  title: "Form is Saving",
+                  type: "info",
+                  showCancelButton: false,
+                  confirmButtonColor: "#00B96F",
+                  confirmButtonText: "OK",
+                }).then((res) => {
+                    setTimeout(function () {
+                      swal("Saved in the DB","","success");
+                    }, 1300);
+                    setTimeout(function () {
+                      location.reload();
+                    }, 2800);
+                })
+              });
+          }
+
+          this.fetchService.model = this.model;
+          
+
+        });
+    }); 
+
+  }
+
 }
