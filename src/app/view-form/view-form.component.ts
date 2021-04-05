@@ -17,15 +17,16 @@ export class ViewFormComponent implements OnInit {
   ) { }
 
   @Input() form = {};
+  @Input() screen = {};
 
-  // @ViewChild(SignaturePad) signaturePad: SignaturePad;
+  @ViewChild(SignaturePad) signaturePad: SignaturePad;
    
-  // private signaturePadOptions: Object = { // passed through to szimek/signature_pad constructor
-  //   'minWidth': 5,
-  //   'canvasWidth': 500,
-  //   'canvasHeight': 100,
-  //   'backgroundColor': '#FFFF88',
-  // };
+  private signaturePadOptions: Object = { // passed through to szimek/signature_pad constructor
+    'minWidth': 5,
+    'canvasWidth': 500,
+    'canvasHeight': 100,
+    'backgroundColor': '#FFFF88',
+  };
 
  
   // ngAfterViewInit() {
@@ -34,16 +35,16 @@ export class ViewFormComponent implements OnInit {
   //   this.signaturePad.clear(); // invoke functions from szimek/signature_pad API
   // }
 
-  // drawComplete() {
-  //   // will be notified of szimek/signature_pad's onEnd event
-  //   console.log(this.signaturePad.toDataURL('image/png'));
-  // }
+  drawComplete() {
+    // will be notified of szimek/signature_pad's onEnd event
+    console.log(this.signaturePad.toDataURL('image/png'));
+  }
  
    
-  // drawStart() {
-  //   // will be notified of szimek/signature_pad's onBegin event
-  //   console.log('begin drawing');
-  // }
+  drawStart() {
+    // will be notified of szimek/signature_pad's onBegin event
+    console.log('begin drawing');
+  }
   @Input() indexval: number;
   value:value={
     label:"",
@@ -231,26 +232,7 @@ export class ViewFormComponent implements OnInit {
       }
       this.model.attributes = fieldsArr;
     });
-    // var fieldsArr = []
-    // this.fetchService.getForm(this.fetchService.screenData["screenid"])
-    // .subscribe((res)=>{
-      
-    //   //For each form, get all fields
-    //   for(var i=0;i<1;i++)
-    //   {
-    //     this.forms.push(res[0].ScreenFormID);
-    //     this.model.name = res[0].FormName;
-    //     this.model.description = res[0].FormDesc;
-    //     this.fetchService.getFormFields(res[0].ScreenFormID)
-    //     .subscribe((fields) => {
-
-    //       for(var i=0;i<fields.length;i++)
-    //       {
-    //         fieldsArr.push(JSON.parse(fields[i].FieldJSON));
-    //       }
-    //       this.model.attributes = fieldsArr;
-    //     });
-    //   }
+    
       
     //     //  this.fetchService.getFormFields(this.fetchService.formData["FormID"])
     //     // .subscribe((fields) => {
@@ -342,6 +324,12 @@ export class ViewFormComponent implements OnInit {
       {
         this.fetchService.getFormDSD(this.form["FormID"])
         .subscribe((ress)=>{
+
+          //console.log(this.screen)
+          for(var i=0;i<labels.length;i++){
+            labels[i] = this.screen["ScreenName"]+"_"+this.model.name.replace(/\s+/g, "_")+"_"+labels[i];
+          }
+          console.log(labels);
 
             this.fetchService.postDynamicTable(ress[0].DSDName,labels,values)
             .subscribe((res) => {

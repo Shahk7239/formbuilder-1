@@ -32,6 +32,13 @@ export class FetcherService {
     return this.subject.asObservable();
   }
   
+  sendAddScreenEvent(screenName){
+    this.subject.next(screenName);
+  }
+  getAddScreenEvent(): Observable<any>{ 
+    return this.subject.asObservable();
+  }
+
   //----------------------------- OLD SERVICES  -----------------
 
   // createDB(name)
@@ -254,7 +261,32 @@ export class FetcherService {
       .pipe(catchError(this.handleError));
   }
 
+  getDSDData(TableName)
+  {
+    const body = {"TableName":TableName};
+    return this.httpClient.post<any>(this.url+"/getDSDData",body)
+      .pipe(catchError(this.handleError));
+  }
 
+  joinTables(ScreenID,FormID)
+  {
+    const body = {"ScreenID":ScreenID,"FormID":FormID};
+    return this.httpClient.post<any>(this.url+"/joinTables",body)
+      .pipe(catchError(this.handleError));
+  }
+
+  postArchived(ScreenID,FormID,DSDName)
+  {
+    const body = {"ScreenID":ScreenID,"FormID":FormID,"DSDName":DSDName};
+    return this.httpClient.post<any>(this.url+"/postArchived",body)
+      .pipe(catchError(this.handleError));
+  }
+
+  getArchived()
+  {
+    return this.httpClient.get<any>(this.url+"/getArchived")
+      .pipe(catchError(this.handleError));
+  }
 
   // deleteFormID(FormID)
   // {

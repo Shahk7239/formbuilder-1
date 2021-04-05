@@ -15,41 +15,57 @@ import { Subscription } from 'rxjs';
 export class DropAreaComponent implements OnInit {
   
   clickFormViewsubscription:Subscription;
-  constructor(private fetchService: FetcherService) {
-     
-  this.clickFormViewsubscription = this.fetchService.getFormClickEvent()
-  .subscribe((res)=>{
-    // console.log(res);
-    this.fetchService.screenData["existForm"] = true;
-    this.formDisplay(res["form"],res["screen"]);
-  })
+  clickAddScreensubscription:Subscription;
+
+  breadCrumbScreen = ''
+  breadCrumbForm = ''
+
+  constructor(private fetchService: FetcherService) 
+  {
+    
+    this.clickAddScreensubscription = this.fetchService.getAddScreenEvent()
+    .subscribe((res) => {
+      this.breadCrumbScreen = res;
+      this.ngOnInit();
+    })
+    
+    this.clickFormViewsubscription = this.fetchService.getFormClickEvent()
+    .subscribe((res)=>{
+      // console.log(res);
+      this.breadCrumbScreen = res["screen"]["ScreenName"];
+      this.breadCrumbForm = res["form"]["FormName"];
+
+      this.fetchService.screenData["existForm"] = true;
+      this.formDisplay(res["form"],res["screen"]);
+    })
+
   }
 
-  // @ViewChild(SignaturePad) signaturePad: SignaturePad;
+  @ViewChild(SignaturePad) signaturePad: SignaturePad;
 
-  // private signaturePadOptions: Object = {
-  //   // passed through to szimek/signature_pad constructor
-  //   minWidth: 5,
-  //   canvasWidth: 500,
-  //   canvasHeight: 100,
-  //   backgroundColor: "#FFFF88",
-  // };
+  private signaturePadOptions: Object = {
+    // passed through to szimek/signature_pad constructor
+    minWidth: 5,
+    canvasWidth: 500,
+    canvasHeight: 100,
+    backgroundColor: "#FFFF88",
+  };
 
-  // ngAfterViewInit() {
-  //   // this.signaturePad is now available
-  //   this.signaturePad.set("minWidth", 5); // set szimek/signature_pad options at runtime
-  //   this.signaturePad.clear(); // invoke functions from szimek/signature_pad API
-  // }
+  ngAfterViewInit() {
+    // this.signaturePad is now available
+    this.signaturePad.set("minWidth", 5); // set szimek/signature_pad options at runtime
+    this.signaturePad.clear(); // invoke functions from szimek/signature_pad API
+  }
 
-  // drawComplete() {
-  //   // will be notified of szimek/signature_pad's onEnd event
-  //   console.log(this.signaturePad.toDataURL("image/png"));
-  // }
+  drawComplete() {
+    // will be notified of szimek/signature_pad's onEnd event
+    console.log(this.signaturePad.toDataURL("image/png"));
+  }
 
-  // drawStart() {
-  //   // will be notified of szimek/signature_pad's onBegin event
-  //   console.log("begin drawing");
-  // }
+  drawStart() {
+    // will be notified of szimek/signature_pad's onBegin event
+    console.log("begin drawing");
+  }
 
   @Input() indexval: number;
   value: value = {
@@ -304,32 +320,38 @@ export class DropAreaComponent implements OnInit {
 
   ngOnInit() {
     console.log("in ngOnINit");
+
     this.model.attributes = [];
-    if (this.fetchService.screenData["existForm"] === true) {
-      var fieldsArr = [];
+    if (this.fetchService.screenData["existForm"]) {
+      // var fieldsArr = [];
 
       //For each form, get all fields
-      for (var i = 0; i < this.fetchService.screenData["forms"].length; i++) {
-        if (this.fetchService.screenData["formName"] === this.fetchService.screenData["forms"][i].FormName)
-        {
-          this.model.attributes = this.modelFields;
-          this.model.name = this.fetchService.screenData["forms"][i].FormName;
-          this.model.description = this.fetchService.screenData["forms"][i].FormDesc;
-          this.fetchService.getFormFields(this.fetchService.screenData["forms"][i].ScreenFormID)
-            .subscribe((fields) =>
-            {
-              for (var i = 0; i < fields.length; i++)
-              {
-                fieldsArr.push(JSON.parse(fields[i].FieldJSON));
-              }
-              this.model.attributes = fieldsArr;
-            });
-        }
-      }
-      //this.fetchService.model = this.model;
+      // for (var i = 0; i < this.fetchService.screenData["forms"].length; i++) {
+      //   if (this.fetchService.screenData["formName"] === this.fetchService.screenData["forms"][i].FormName)
+      //   {
+      //     this.model.attributes = this.modelFields;
+      //     this.model.name = this.fetchService.screenData["forms"][i].FormName;
+      //     this.model.description = this.fetchService.screenData["forms"][i].FormDesc;
+      //     this.fetchService.getFormFields(this.fetchService.screenData["forms"][i].ScreenFormID)
+      //       .subscribe((fields) =>
+      //       {
+      //         for (var i = 0; i < fields.length; i++)
+      //         {
+      //           fieldsArr.push(JSON.parse(fields[i].FieldJSON));
+      //         }
+      //         this.model.attributes = fieldsArr;
+      //       });
+      //   }
+      // }
+      this.fetchService.model = this.model;
+    }
+    else
+    {
+      this.model.attributes = []
     }
     if(this.fetchService.formFields.length > 0)
       this.model.attributes = this.fetchService.formFields;
+    
   }
 
 
@@ -394,34 +416,34 @@ export class DropAreaComponent implements OnInit {
           confirmButtonText: "Keep Data and Delete this form",
           cancelButtonText:"Delete both Data and Form",
         }).then((res) => {
-          if(res.value)
-          {
-            //API call to drop table
-            for (var i = 0;i < this.fetchService.screenData["forms"].length;i++)
+          for (var i = 0;i < this.fetchService.screenData["forms"].length;i++)
               {
                 if (this.fetchService.screenData["formName"] === 
                 this.fetchService.screenData["forms"][i].FormName) 
                 {
-                  // this.fetchService.deleteFormID(this.fetchService.screenData["forms"][i].ScreenFormID)
-                  // .subscribe((res) => {
-                  //   console.log(res);
-
-                  // });
-
                   this.fetchService.getFormDSD(this.fetchService.screenData["forms"][i].ScreenFormID)
                     .subscribe((ress) => {
 
-                      this.fetchService.DropTable(ress[0].DSDName)
-                        .subscribe((res) => {
-                          console.log(res);
-                        });
+                      // this.fetchService.DropTable(ress[0].DSDName)
+                      //   .subscribe((res) => {
+                      //     console.log(res);
+                      //   });
+                      this.fetchService.postArchived(this.fetchService.screenData["screenid"],this.fetchService.screenData["forms"][i].ScreenFormID,ress[0].DSDName)
+                      .subscribe((res) => {
+                        console.log(res);
+
+                        this.fetchService.modifyForm(this.fetchService.screenData["forms"][i].ScreenFormID,"Yes")
+                           .subscribe((res) => {
+                            console.log(res);
+                          });
+                      })
 
                     });
                     break;
                 }
               }
               swal('Deleted!','Your Template has been deleted Completely.','success');
-          }
+
           this.model.name = "Form name...";
           this.model.description = "Form Description...";
           this.model.attributes = [];
@@ -577,11 +599,8 @@ export class DropAreaComponent implements OnInit {
                               confirmButtonText: "OK",
                             }).then((res) => {
                               setTimeout(function () {
-                                swal("Saved in the DB","","success");
-                              }, 1300);
-                              setTimeout(function () {
                                 location.reload();
-                              }, 2800);
+                              }, 1500);
                             })
                           });
                         }
@@ -673,6 +692,10 @@ export class DropAreaComponent implements OnInit {
                   console.log(data);
               });
 
+              for(var i=0;i<labels.length;i++){
+                labels[i] = this.fetchService.screenData["screenname"]+"_"+this.model.name.replace(/\s+/g, "_")+"_"+labels[i];
+              }
+
               this.fetchService.alterDynamicTable(ress[0].DSDName, labels)
                 .subscribe((res) => {
                   swal({
@@ -683,11 +706,8 @@ export class DropAreaComponent implements OnInit {
                     confirmButtonText: "OK",
                   }).then((res) => {
                       setTimeout(function () {
-                        swal("Saved in the DB","","success");
-                      }, 1300);
-                      setTimeout(function () {
                         location.reload();
-                      },2800);
+                      },1500);
                   })
                   
                   console.log(res);
@@ -705,6 +725,10 @@ export class DropAreaComponent implements OnInit {
                 console.log(data);
               });
 
+              for(var i=0;i<labels.length;i++){
+                labels[i] = this.fetchService.screenData["screenname"]+"_"+this.model.name.replace(/\s+/g, "_")+"_"+labels[i];
+              }
+
             this.fetchService.createDynamicTable(dynamictable, labels)
               .subscribe((data: {}) => {
                 console.log(data);
@@ -717,11 +741,8 @@ export class DropAreaComponent implements OnInit {
                   confirmButtonText: "OK",
                 }).then((res) => {
                     setTimeout(function () {
-                      swal("Saved in the DB","","success");
-                    }, 1300);
-                    setTimeout(function () {
                       location.reload();
-                    }, 2800);
+                    }, 1500);
                 })
               });
           }

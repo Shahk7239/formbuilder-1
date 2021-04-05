@@ -1,6 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { RouterModule, Routes, ActivatedRoute, ActivatedRouteSnapshot} from '@angular/router';
 import { AppRoutingModule, routingComponent } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -20,13 +20,21 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import {MatStepperModule} from '@angular/material/stepper';
 import { ViewDataComponent } from './view-data/view-data.component';
 import {MatTabsModule} from '@angular/material/tabs';
-import {MatAutocompleteModule} from '@angular/material/autocomplete';
-import {MatInputModule} from '@angular/material/input';
 import {MatButtonModule} from '@angular/material/button';
+import {MatAutocompleteModule} from '@angular/material/autocomplete';
+import {MatSelectModule} from '@angular/material/select';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatPaginatorModule} from '@angular/material/paginator';
+import {MatInputModule} from '@angular/material/input';
+import {MatTableModule} from '@angular/material/table';
+import { ReactiveFormsModule } from '@angular/forms';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatChipsModule} from '@angular/material/chips';
 import {MatIconModule} from '@angular/material/icon';
-import {MatTableModule} from '@angular/material/table';
+import { MatSortModule } from '@angular/material/sort';
+import {MatTooltipModule} from '@angular/material/tooltip';
+import { MatTableExporterModule } from 'mat-table-exporter';
+import {MatMenuModule} from '@angular/material/menu';
 
 
 const appRoutes: Routes = [
@@ -50,22 +58,16 @@ const appRoutes: Routes = [
     SweetAlert2Module.forRoot(),
     BrowserModule,
     FormsModule,
+    ReactiveFormsModule,
     AppRoutingModule,
     DndModule,
     HttpClientModule,
     SignaturePadModule,
     NgbModule,
     NoopAnimationsModule,
-    MatStepperModule,
-    MatTabsModule,
-    MatAutocompleteModule,
-    MatInputModule,
-    ReactiveFormsModule,
-    MatButtonModule,
-    MatCheckboxModule,
-    MatChipsModule,
-    MatIconModule,
-    MatTableModule
+    MatStepperModule,MatTabsModule,MatButtonModule,MatAutocompleteModule, MatTableModule,
+    MatSelectModule,MatFormFieldModule, MatPaginatorModule, MatInputModule, MatCheckboxModule,
+    MatChipsModule,MatIconModule,MatSortModule, MatTooltipModule,MatTableExporterModule,MatMenuModule,
   ],
   providers: [FetcherService],
   bootstrap: [AppComponent]

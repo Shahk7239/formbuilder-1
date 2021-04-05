@@ -12,7 +12,7 @@
   </div>
   <div class="spacer30"></div>
   <div class="row" >
-    <div class="col-3" style="overflow:hidden;float: left;" >
+    <div class="col-2" style="overflow:hidden;float: left;border-right: 1px solid rgb(175, 165, 165);;" >
 
         <!-- <div class="row">
         <label class="col-8">Background Color</label>
@@ -42,21 +42,39 @@
       <!--a dropzone-->
       <!--to allow dropping content that is not [dndDraggable] set dndAllowExternal to true-->
       <div *ngFor="let drop of dropArr.slice().reverse()" style="margin-top:70px;">
-        <h2>Template {{drop}}</h2>
-        <hr>
+        <!-- <h2>Template {{drop}}</h2> -->
         <app-drop-area [indexval]="drop"  [editForm]="editForm" ></app-drop-area>
       </div>
     </div>
 
-    <div class="col-2" style="margin-top: 20px;">	
-        <h4>Components</h4>	
-        <hr>	
+    <div class="col-3" style="margin-top: 20px;border-left: 1px solid rgb(175, 165, 165);">	
+        <h4>Components</h4>		
         <button type="button" class="btn btn-outline-primary btn-sm" (click)="openPopup(content)"><i class="fa fa-plus"></i>&nbsp;Add Screen</button>	
         <hr>	
 
         <div *ngIf="getScreens.length < 1">
           <span>No Screens Yet</span>
         </div>
+        <div *ngIf="getScreens.length > 0">
+          <span>List of Screens</span>
+        </div>
+
+        <!-- <ngb-accordion [closeOthers]="true">
+          <ngb-panel *ngFor="let screen of getScreens;let i=index;"
+           id="static{{i}}" title={{screen.ScreenName}}>
+            <ng-template ngbPanelContent>
+              <button type="button" class="btn btn-secondary btn-sm" (click)="addScreenForm(screen)"><i class="fa fa-plus"></i>&nbsp;Add Form</button>	
+              <ul *ngFor="let form of getForms">	
+                <li *ngIf="form.ScreenID==screen.ScreenID" style="line-height: 1.5;">	
+                  <a href="javascript:void(0)" (click)="formDisplay(form, screen)">{{form.FormName}}</a>	
+                  &nbsp;	
+                  <a href="javascript: void(0);" (click)="formEdit(form, screen)"><i class="fa fa-edit"></i></a>	
+                </li>	
+              </ul>
+            </ng-template>
+          </ngb-panel>
+        </ngb-accordion> -->
+
         <div *ngFor="let screen of getScreens">	
           <h5 style="display: inline;">{{screen.ScreenName}}</h5>	
           &nbsp;	
@@ -69,9 +87,8 @@
             </li>	
           </ul>	
           <hr>	
-        </div>	
+        </div>
     </div>
-
   </div>
 </div>
 
